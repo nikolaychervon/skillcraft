@@ -23,7 +23,7 @@ setup:
 	@echo "$(BOLD)$(BG_BLUE)$(WHITE)  🚀 SkillCraft Backend — полная установка  $(RESET)"
 	@echo "$(BOLD)$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	make env
-	make key
+	php src/artisan key:generate
 	make build
 	make migrate
 	@echo "$(BOLD)$(GREEN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
