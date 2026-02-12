@@ -12,6 +12,11 @@ services:
     networks:
       - skillcraft
     command: php-fpm
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   worker:
     build:
@@ -25,11 +30,13 @@ services:
       - ./src:/var/www
     networks:
       - skillcraft
-    depends_on:
-      - redis
-      - postgres
     command: php artisan horizon
     restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   redis:
     image: redis:7-alpine
@@ -70,6 +77,12 @@ services:
     networks:
       - skillcraft
     restart: unless-stopped
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U skillcraft -d skillcraft" ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   mailhog:
     image: mailhog/mailhog

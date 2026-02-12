@@ -23,7 +23,8 @@ setup:
 	@echo "$(BOLD)$(BG_BLUE)$(WHITE)  🚀 SkillCraft Backend — полная установка  $(RESET)"
 	@echo "$(BOLD)$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	make env
-	php src/artisan key:generate
+	make composer-install
+	make key
 	make build
 	make migrate
 	@echo "$(BOLD)$(GREEN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
@@ -51,13 +52,12 @@ build:
 	docker-compose up -d --build
 	@echo "$(GREEN)  ✅ Контейнеры успешно собраны и запущены!$(RESET)"
 	@echo "$(BOLD)$(BLUE)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
-	make composer-install
 
 # 3️⃣ Генерация ключа приложения
 key:
 	@echo "$(BOLD)$(MAGENTA)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	@echo "$(BOLD)$(BG_MAGENTA)$(WHITE)  🔑 Генерация ключа приложения  $(RESET)"
-	$(ARTISAN) key:generate
+	php src/artisan key:generate
 	@echo "$(GREEN)  ✅ Ключ приложения успешно сгенерирован!$(RESET)"
 	@echo "$(BOLD)$(MAGENTA)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 
@@ -66,7 +66,7 @@ composer-install:
 	@echo "$(BOLD)$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	@echo "$(BOLD)$(BG_CYAN)$(WHITE)  📦 Установка Composer-зависимостей  $(RESET)"
 	@echo "$(CYAN)  → Запуск composer install...$(RESET)"
-	$(PHP) composer install
+	composer install --working-dir=src
 	@echo "$(GREEN)  ✅ Composer-зависимости установлены!$(RESET)"
 	@echo "$(BOLD)$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 
