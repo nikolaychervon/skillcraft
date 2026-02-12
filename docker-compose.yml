@@ -4,8 +4,6 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile
     container_name: skillcraft_back
-    env_file:
-      - src/.env
     volumes:
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/php.ini:ro
       - ./src:/var/www
