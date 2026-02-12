@@ -23,8 +23,8 @@ setup:
 	@echo "$(BOLD)$(BG_BLUE)$(WHITE)  🚀 SkillCraft Backend — полная установка  $(RESET)"
 	@echo "$(BOLD)$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	make env
-	make build
 	make key
+	make build
 	make migrate
 	@echo "$(BOLD)$(GREEN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	@echo "$(BOLD)$(BG_GREEN)$(WHITE)  ✅ Установка завершена! Проект готов к работе  $(RESET)"
