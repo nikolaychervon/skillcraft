@@ -26,3 +26,35 @@ P.S. Все доступные команды make, можно посмотре�
 ```shell
   make help
 ```
+
+Сайт: http://localhost
+
+Telescope: http://localhost/telescope
+
+Horizon: http://localhost/horizon
+
+---
+## 📂 Структура проекта
+
+```bash
+  skillcraft-backend/
+    ├── 🐳 docker/ # Настройки контейнеров
+    ├── 📁 src/
+    │   ├── app/
+    │   │   ├── Actions/       # Бизнес-логика
+    │   │   ├── DTO/           # Readonly DTO
+    │   │   ├── Exceptions/    # Кастомные исключения
+    │   │   ├── Http/          # Controllers, Requests, Responses
+    │   │   ├── Models/        # Eloquent
+    │   │   ├── Notifications/ # Уведомления
+    │   │   └── Repositories/  # Абстракция БД
+    │   ├── config/   # Конфиги
+    │   ├── database/ # Миграции, Сидеры, Фабрики
+    │   ├── lang/     # Localization (ru/en)
+    │   ├── routes/   # api.php (v1)
+    │   ├── tests/    # Tests
+    │   └── .env (.env.example) # Окружение
+    ├── 🐘 docker-compose.yml # Упаковка контейнеров
+    ├── 📜 Makefile # Команды для управления проектом
+    └── 📖 README.md # Ты тут :)
+```
