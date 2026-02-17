@@ -41,13 +41,20 @@ Horizon: http://localhost/horizon
     ├── 🐳 docker/ # Настройки контейнеров
     ├── 📁 src/
     │   ├── app/
-    │   │   ├── Actions/       # Бизнес-логика
-    │   │   ├── DTO/           # Readonly DTO
-    │   │   ├── Exceptions/    # Кастомные исключения
-    │   │   ├── Http/          # Controllers, Requests, Responses
-    │   │   ├── Models/        # Eloquent
-    │   │   ├── Notifications/ # Уведомления
-    │   │   └── Repositories/  # Абстракция БД
+    │   │   ├── Application/    # Приложение
+    │   │   │   ├── Auth/           # Аутентификация
+    │   │   │   ├── .../            # Слой для n
+    │   │   │   ├── Shared/         # Слой для общего кода
+    │   │   ├── Domain/         # Бизнес логика
+    │   │   │   ├── Auth/           # Аутентификация
+    │   │   │   ├── .../            # Слой для n
+    │   │   ├── Infrastructure/ # Инфраструктура
+    │   │   │   ├── Auth/           # Аутентификация
+    │   │   │   ├── Notification/   # Уведомления
+    │   │   │   ├── .../            # Слой для n
+    │   │   ├── Http/           # Controllers, Requests, Responses, Middlewares
+    │   │   ├── Models/         # Общие модели
+    │   │   ├── Providers/      # Провайдеры Laravel
     │   ├── config/   # Конфиги
     │   ├── database/ # Миграции, Сидеры, Фабрики
     │   ├── lang/     # Localization (ru/en)
