@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Application\Auth\Assemblers\ResetPasswordDTOAssembler;
-use App\Application\Shared\Exceptions\User\UserNotFoundException;
-use App\Domain\Auth\Actions\Password\ResetPasswordAction;
-use App\Domain\Auth\Actions\Password\SendPasswordResetLinkAction;
-use App\Domain\Auth\Exceptions\InvalidResetTokenException;
-use App\Domain\Auth\Exceptions\PasswordResetFailedException;
+use App\Domain\User\Exceptions\UserNotFoundException;
+use App\Application\User\Auth\Assemblers\ResetPasswordDTOAssembler;
+use App\Domain\User\Auth\Actions\Password\ResetPasswordAction;
+use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
+use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
+use App\Domain\User\Auth\Exceptions\PasswordResetFailedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;

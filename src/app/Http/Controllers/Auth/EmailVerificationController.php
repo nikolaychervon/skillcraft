@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Application\Auth\Assemblers\ResendEmailDTOAssembler;
-use App\Application\Shared\Exceptions\User\Email\EmailAlreadyVerifiedException;
-use App\Application\Shared\Exceptions\User\Email\InvalidConfirmationLinkException;
-use App\Application\Shared\Exceptions\User\UserNotFoundException;
-use App\Domain\Auth\Actions\Email\ResendEmailAction;
-use App\Domain\Auth\Actions\Email\VerifyEmailAction;
+use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
+use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
+use App\Domain\User\Exceptions\UserNotFoundException;
+use App\Application\User\Auth\Assemblers\ResendEmailDTOAssembler;
+use App\Domain\User\Auth\Actions\Email\ResendEmailAction;
+use App\Domain\User\Auth\Actions\Email\VerifyEmailAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResendEmailRequest;
 use App\Http\Responses\ApiResponse;

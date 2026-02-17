@@ -14,4 +14,3 @@ class TestNoConstructorDTOAssembler extends AbstractDTOAssembler
         return TestNoConstructorDTO::class;
     }
 }
-

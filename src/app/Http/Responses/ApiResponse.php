@@ -2,21 +2,11 @@
 
 namespace App\Http\Responses;
 
+use App\Application\Shared\Constants\HttpCodesConstants;
 use Illuminate\Http\JsonResponse;
 
 class ApiResponse
 {
-    public const int
-        HTTP_OK = 200,
-        HTTP_CREATED = 201,
-        HTTP_BAD_REQUEST = 400,
-        HTTP_NOT_AUTHORIZED = 401,
-        HTTP_FORBIDDEN = 403,
-        HTTP_NOT_FOUND = 404,
-        HTTP_VALIDATION_ERROR = 422,
-        HTTP_TOO_MANY_REQUESTS = 429,
-        HTTP_SERVER_ERROR = 500;
-
     /**
      * @param string $message
      * @param mixed|null $data
@@ -26,7 +16,7 @@ class ApiResponse
     public static function success(
         string $message = 'Success',
         mixed $data = null,
-        int $code = self::HTTP_OK
+        int $code = HttpCodesConstants::HTTP_OK
     ) : JsonResponse {
         return response()->json([
             'success' => true,
@@ -43,7 +33,7 @@ class ApiResponse
      */
     public static function error(
         string $message = 'Error',
-        int $code = self::HTTP_BAD_REQUEST,
+        int $code = HttpCodesConstants::HTTP_BAD_REQUEST,
         mixed $errors = null
     ): JsonResponse {
         $response = [
@@ -65,6 +55,6 @@ class ApiResponse
      */
     public static function validationError(mixed $errors = null, string $message = 'Validation Error'): JsonResponse
     {
-        return self::error($message, self::HTTP_VALIDATION_ERROR, $errors);
+        return self::error($message, HttpCodesConstants::HTTP_VALIDATION_ERROR, $errors);
     }
 }

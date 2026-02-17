@@ -2,19 +2,19 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Application\Shared\Exceptions\User\UserNotFoundException;
-use App\Domain\Auth\Actions\CreateNewUserAction;
-use App\Domain\Auth\Actions\Password\ResetPasswordAction;
-use App\Domain\Auth\Actions\Password\SendPasswordResetLinkAction;
-use App\Domain\Auth\Cache\PasswordResetTokensCacheInterface;
-use App\Domain\Auth\DTO\CreatingUserDTO;
-use App\Domain\Auth\DTO\ResetPasswordDTO;
-use App\Domain\Auth\Exceptions\InvalidResetTokenException;
-use App\Domain\Auth\Exceptions\PasswordResetFailedException;
-use App\Domain\Auth\Repositories\UserRepositoryInterface;
-use App\Domain\Auth\Services\HashServiceInterface;
-use App\Domain\Auth\Services\TokenServiceInterface;
-use App\Domain\Auth\Services\TransactionServiceInterface;
+use App\Domain\User\Exceptions\UserNotFoundException;
+use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Domain\User\Auth\Actions\Password\ResetPasswordAction;
+use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
+use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
+use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\DTO\ResetPasswordDTO;
+use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
+use App\Domain\User\Auth\Exceptions\PasswordResetFailedException;
+use App\Domain\User\Auth\Services\HashServiceInterface;
+use App\Domain\User\Auth\Services\TokenServiceInterface;
+use App\Domain\User\Auth\Services\TransactionServiceInterface;
+use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;

@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\Auth\Actions\CreateNewUserAction;
-use App\Domain\Auth\Actions\Password\SendPasswordResetLinkAction;
-use App\Domain\Auth\Cache\PasswordResetTokensCacheInterface;
-use App\Domain\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
+use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
+use App\Domain\User\Auth\DTO\CreatingUserDTO;
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\Auth\Actions\LogoutUserAction;
-use App\Domain\Auth\Services\TokenServiceInterface;
+use App\Domain\User\Auth\Actions\LogoutUserAction;
+use App\Domain\User\Auth\Services\TokenServiceInterface;
 use App\Models\User;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
@@ -28,4 +28,3 @@ class LogoutUserActionTest extends TestCase
         $action->run($user);
     }
 }
-

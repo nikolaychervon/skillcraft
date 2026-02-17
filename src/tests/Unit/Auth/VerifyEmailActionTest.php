@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Application\Shared\Exceptions\User\Email\EmailAlreadyVerifiedException;
-use App\Application\Shared\Exceptions\User\Email\InvalidConfirmationLinkException;
-use App\Application\Shared\Exceptions\User\UserNotFoundException;
-use App\Domain\Auth\Actions\CreateNewUserAction;
-use App\Domain\Auth\Actions\Email\VerifyEmailAction;
-use App\Domain\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
+use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
+use App\Domain\User\Exceptions\UserNotFoundException;
+use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Domain\User\Auth\Actions\Email\VerifyEmailAction;
+use App\Domain\User\Auth\DTO\CreatingUserDTO;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;

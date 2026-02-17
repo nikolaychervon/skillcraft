@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Notifications\Auth;
 
-use App\Domain\Auth\Constants\AuthConstants;
+use App\Domain\User\Auth\Constants\AuthConstants;
 use App\Infrastructure\Notifications\Base\EmailNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 

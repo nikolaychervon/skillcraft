@@ -14,6 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property string $last_name
  * @property ?string $middle_name
  * @property string $email
+ * @property ?string $pending_email
  * @property string $level
  * @property string $unique_nickname
  * @property string $password
@@ -31,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'level',
         'unique_nickname',
         'email',
+        'pending_email',
         'password',
         'email_verified_at',
     ];
