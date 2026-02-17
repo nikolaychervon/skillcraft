@@ -45,23 +45,29 @@ Horizon: http://localhost/horizon
     │   ├── app/
     │   │   ├── Application/                # Слой приложения (use-cases, сборка DTO)
     │   │   │   ├── Auth/                   # Аутентификация
-    │   │   │   └── Shared/                 # Общие компоненты (DTO, assemblers, exceptions, constants)
+    │   │   │   ├── Profile/                # Профиль разработчика
+    │   │   │   ├── Shared/                 # Общие компоненты (DTO, assemblers, exceptions, constants)
+    │   │   │   └── .../
     │   │   ├── Domain/                     # Домен (бизнес-логика)
     │   │   │   └── Auth/
-    │   │   │       ├── Actions/            # Юзкейсы (Login/Register/Reset/etc)
-    │   │   │       ├── Cache/              # Доменные интерфейсы кеша
-    │   │   │       ├── Constants/          # Доменные константы
-    │   │   │       ├── DTO/                # DTO домена
-    │   │   │       ├── Exceptions/         # Доменные исключения
-    │   │   │       ├── Repositories/       # Доменные интерфейсы репозиториев
-    │   │   │       ├── Services/           # Доменные интерфейсы сервисов (hash/tokens/notify/tx)
-    │   │   │       └── Specifications/     # Спецификации (правила)
+    │   │   │   │    ├── Actions/           # Юзкейсы (Login/Register/Reset/etc)
+    │   │   │   │    ├── Cache/             # Доменные интерфейсы кеша
+    │   │   │   │    ├── Constants/         # Доменные константы
+    │   │   │   │    ├── DTO/               # DTO домена
+    │   │   │   │    ├── Exceptions/        # Доменные исключения
+    │   │   │   │    ├── Repositories/      # Доменные интерфейсы репозиториев
+    │   │   │   │    ├── Services/          # Доменные интерфейсы сервисов (hash/tokens/notify/tx)
+    │   │   │   │    └── Specifications/    # Спецификации (правила)
+    │   │   │   ├── Profile/
+    │   │   │   └── .../
     │   │   ├── Infrastructure/             # Инфраструктура (Laravel/Eloquent/Cache/Notify/DB)
     │   │   │   ├── Auth/
     │   │   │   │   ├── Cache/              # Реализации кеша
     │   │   │   │   ├── Repositories/       # Реализации репозиториев
     │   │   │   │   └── Services/           # Реализации доменных сервисов
+    │   │   │   ├── Profile/
     │   │   │   └── Notifications/          # Email-уведомления (queued)
+    │   │   │   └── .../
     │   │   ├── Http/                       # Controllers, Requests, Responses, Middlewares
     │   │   ├── Models/                     # Eloquent модели
     │   │   └── Providers/                  # Service providers (bindings)
