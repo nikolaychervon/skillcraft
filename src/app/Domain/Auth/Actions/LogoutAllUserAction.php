@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Auth\Actions;
 
+use App\Domain\Auth\Services\TokenServiceInterface;
 use App\Models\User;
 
 class LogoutAllUserAction
 {
-    /**
-     * @param User $user
-     * @return void
-     */
+    public function __construct(
+        private readonly TokenServiceInterface $tokenService
+    ) {
+    }
+
     public function run(User $user): void
     {
-        $user->tokens()->delete();
+        $this->tokenService->deleteAllTokens($user);
     }
 }

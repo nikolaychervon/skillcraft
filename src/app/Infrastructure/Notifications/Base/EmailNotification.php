@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\Notifications\Base;
 
 use Illuminate\Bus\Queueable;
@@ -16,6 +18,9 @@ abstract class EmailNotification extends Notification implements ShouldQueue
         return ['mail'];
     }
 
+    /**
+     * @param array<string, mixed> $params
+     */
     protected function buildMailMessage(array $params): MailMessage
     {
         $message = new MailMessage();
@@ -36,6 +41,7 @@ abstract class EmailNotification extends Notification implements ShouldQueue
                     }
                     break;
                 case 'action':
+                    /** @var array{text: string, url: string} $content */
                     $message->action($content['text'], $content['url']);
                     break;
             }

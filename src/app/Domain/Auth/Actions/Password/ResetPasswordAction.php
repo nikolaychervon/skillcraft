@@ -1,40 +1,40 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Auth\Actions\Password;
 
 use App\Application\Shared\Exceptions\User\UserNotFoundException;
+use App\Domain\Auth\Constants\AuthConstants;
 use App\Domain\Auth\Cache\PasswordResetTokensCacheInterface;
 use App\Domain\Auth\DTO\ResetPasswordDTO;
 use App\Domain\Auth\Exceptions\InvalidResetTokenException;
 use App\Domain\Auth\Exceptions\PasswordResetFailedException;
 use App\Domain\Auth\Repositories\UserRepositoryInterface;
+use App\Domain\Auth\Services\HashServiceInterface;
+use App\Domain\Auth\Services\TokenServiceInterface;
+use App\Domain\Auth\Services\TransactionServiceInterface;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class ResetPasswordAction
 {
-    /**
-     * @param UserRepositoryInterface $userRepository
-     * @param PasswordResetTokensCacheInterface $passwordResetTokensCache
-     */
     public function __construct(
-        private UserRepositoryInterface $userRepository,
-        private PasswordResetTokensCacheInterface $passwordResetTokensCache,
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly PasswordResetTokensCacheInterface $passwordResetTokensCache,
+        private readonly HashServiceInterface $hashService,
+        private readonly TokenServiceInterface $tokenService,
+        private readonly TransactionServiceInterface $transactionService
     ) {
     }
 
     /**
-     * @param ResetPasswordDTO $resetPasswordDTO
-     * @return string
-     *
      * @throws InvalidResetTokenException
      * @throws PasswordResetFailedException
      * @throws UserNotFoundException
      */
     public function run(ResetPasswordDTO $resetPasswordDTO): string
     {
-        /** @var ?string $token */
         $token = $this->passwordResetTokensCache->get($resetPasswordDTO->getEmail());
         if (!$token || $token !== $resetPasswordDTO->getResetToken()) {
             throw new InvalidResetTokenException();
@@ -49,30 +49,28 @@ class ResetPasswordAction
     }
 
     /**
-     * @param User $user
-     * @param ResetPasswordDTO $resetPasswordDTO
-     * @return string
-     *
      * @throws PasswordResetFailedException
      */
     private function reset(User $user, ResetPasswordDTO $resetPasswordDTO): string
     {
         try {
-            DB::beginTransaction();
+            return $this->transactionService->transaction(function () use ($user, $resetPasswordDTO) {
+                $hashedPassword = $this->hashService->make($resetPasswordDTO->getPassword());
+                $this->userRepository->updatePassword($user, $hashedPassword);
 
-            $user->update([
-                'password' => Hash::make($resetPasswordDTO->getPassword()),
+                $this->passwordResetTokensCache->delete($resetPasswordDTO->getEmail());
+                $this->tokenService->deleteAllTokens($user);
+
+                return $this->tokenService->createAuthToken($user, AuthConstants::DEFAULT_TOKEN_NAME);
+            });
+        } catch (\Throwable $e) {
+            Log::error('Password reset failed', [
+                'email' => $resetPasswordDTO->getEmail(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
-            $this->passwordResetTokensCache->delete($resetPasswordDTO->getEmail());
-            $user->tokens()->delete();
-
-            DB::commit();
-            return $user->createToken('auth_token')->plainTextToken;
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            throw new PasswordResetFailedException();
+            throw new PasswordResetFailedException(previous: $e);
         }
     }
 }

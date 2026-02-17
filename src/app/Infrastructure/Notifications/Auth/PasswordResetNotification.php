@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Infrastructure\Notifications\Auth;
 
-use App\Infrastructure\Auth\Cache\PasswordResetTokensCache;
+use App\Domain\Auth\Constants\AuthConstants;
 use App\Infrastructure\Notifications\Base\EmailNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 
@@ -18,7 +20,7 @@ class PasswordResetNotification extends EmailNotification
     {
         return $this->buildMailMessage([
             'reset_url' => $this->generateResetUrl(),
-            'expires_minutes' => PasswordResetTokensCache::TTL,
+            'expires_minutes' => AuthConstants::PASSWORD_RESET_TOKEN_TTL,
         ]);
     }
 

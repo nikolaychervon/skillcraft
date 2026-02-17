@@ -1,36 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Auth\Actions;
 
 use App\Domain\Auth\DTO\CreatingUserDTO;
 use App\Domain\Auth\Repositories\UserRepositoryInterface;
-use App\Infrastructure\Notifications\Auth\VerifyEmailForRegisterNotification;
+use App\Domain\Auth\Services\NotificationServiceInterface;
 use App\Models\User;
 
 class RegisterUserAction
 {
-    /**
-     * @param UserRepositoryInterface $userRepository
-     * @param CreateNewUserAction $createNewUserAction
-     */
     public function __construct(
-        private UserRepositoryInterface $userRepository,
-        private CreateNewUserAction $createNewUserAction,
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly CreateNewUserAction $createNewUserAction,
+        private readonly NotificationServiceInterface $notificationService
     ) {
     }
 
-    /**
-     * @param CreatingUserDTO $creatingUserDTO
-     * @return User
-     */
     public function run(CreatingUserDTO $creatingUserDTO): User
     {
         $user = $this->userRepository->findByEmail($creatingUserDTO->getEmail());
+
         if (!$user instanceof User) {
             $user = $this->createNewUserAction->run($creatingUserDTO);
         }
 
-        $user->notify(new VerifyEmailForRegisterNotification());
+        $this->notificationService->sendEmailVerificationNotification($user);
+
         return $user;
     }
 }

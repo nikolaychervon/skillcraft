@@ -4,6 +4,7 @@ namespace Tests\Unit\Application\Assemblers;
 
 use PHPUnit\Framework\TestCase;
 use App\Application\Shared\Exceptions\DTO\DTOAssemblyException;
+use Tests\Fakes\DTOAssembler\TestNoConstructorDTOAssembler;
 use Tests\Fakes\DTOAssembler\TestUserDTO;
 use Tests\Fakes\DTOAssembler\TestUserDTOAssembler;
 
@@ -58,5 +59,13 @@ class AbstractDTOAssemblerTest extends TestCase
         $this->assembler->assemble([
             'firstName' => 'John',
         ]);
+    }
+
+    public function test_it_throws_exception_when_dto_has_no_constructor(): void
+    {
+        $this->expectException(DTOAssemblyException::class);
+
+        $assembler = new TestNoConstructorDTOAssembler();
+        $assembler->assemble([]);
     }
 }

@@ -73,11 +73,26 @@ class AuthorizeUserActionTest extends TestCase
 
     public function test_it_throws_exception_when_password_is_incorrect(): void
     {
+        // важно: пользователь должен быть подтвержден, иначе упадем на проверке email verification
+        $this->user->markEmailAsVerified();
+
         $this->expectException(IncorrectLoginDataException::class);
 
         $dto = $this->loginUserDtoAssembler->assemble([
             'email' => 'ivan@example.com',
             'password' => 'WrongPassword123!',
+        ]);
+
+        $this->action->run($dto);
+    }
+
+    public function test_it_throws_exception_when_email_not_verified(): void
+    {
+        $this->expectException(IncorrectLoginDataException::class);
+
+        $dto = $this->loginUserDtoAssembler->assemble([
+            'email' => 'ivan@example.com',
+            'password' => $this->password,
         ]);
 
         $this->action->run($dto);

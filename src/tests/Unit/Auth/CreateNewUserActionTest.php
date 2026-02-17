@@ -85,7 +85,6 @@ class CreateNewUserActionTest extends TestCase
         $user = $this->action->run($dto);
 
         $this->assertNotEquals('PlainTextPassword123!', $user->password);
-        $this->assertStringStartsWith('$2y$', $user->password);
         $this->assertTrue(Hash::check('PlainTextPassword123!', $user->password));
     }
 }

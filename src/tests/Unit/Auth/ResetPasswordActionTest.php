@@ -12,6 +12,9 @@ use App\Domain\Auth\DTO\ResetPasswordDTO;
 use App\Domain\Auth\Exceptions\InvalidResetTokenException;
 use App\Domain\Auth\Exceptions\PasswordResetFailedException;
 use App\Domain\Auth\Repositories\UserRepositoryInterface;
+use App\Domain\Auth\Services\HashServiceInterface;
+use App\Domain\Auth\Services\TokenServiceInterface;
+use App\Domain\Auth\Services\TransactionServiceInterface;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -164,6 +167,46 @@ class ResetPasswordActionTest extends TestCase
         $action->run($dto);
     }
 
+    public function test_it_wraps_exception_when_update_password_fails_inside_transaction(): void
+    {
+        $this->sendResetLinkAction->run($this->email);
+        $token = $this->cache->get($this->email);
+
+        $dto = new ResetPasswordDTO(
+            email: $this->email,
+            resetToken: $token,
+            password: $this->newPassword
+        );
+
+        $repo = $this->createMock(UserRepositoryInterface::class);
+        $repo->method('findByEmail')->willReturn($this->user);
+        $repo->method('updatePassword')->willThrowException(new \RuntimeException('db write failed'));
+
+        $hashService = app(HashServiceInterface::class);
+
+        $tokenService = $this->createMock(TokenServiceInterface::class);
+        $transactionService = $this->createMock(TransactionServiceInterface::class);
+        $transactionService->expects($this->once())
+            ->method('transaction')
+            ->willReturnCallback(static fn (callable $callback) => $callback());
+
+        $action = new ResetPasswordAction(
+            userRepository: $repo,
+            passwordResetTokensCache: $this->cache,
+            hashService: $hashService,
+            tokenService: $tokenService,
+            transactionService: $transactionService
+        );
+
+        try {
+            $action->run($dto);
+            $this->fail('Expected PasswordResetFailedException was not thrown.');
+        } catch (PasswordResetFailedException $e) {
+            $this->assertInstanceOf(\RuntimeException::class, $e->getPrevious());
+            $this->assertSame('db write failed', $e->getPrevious()->getMessage());
+        }
+    }
+
     public function test_it_uses_transaction(): void
     {
         $this->sendResetLinkAction->run($this->email);
@@ -175,16 +218,9 @@ class ResetPasswordActionTest extends TestCase
             password: $this->newPassword
         );
 
-        DB::shouldReceive('beginTransaction')
+        DB::shouldReceive('transaction')
             ->once()
-            ->andReturnNull();
-
-        DB::shouldReceive('commit')
-            ->once()
-            ->andReturnNull();
-
-        DB::shouldReceive('rollBack')
-            ->never();
+            ->andReturnUsing(static fn (callable $callback) => $callback());
 
         $this->action->run($dto);
     }

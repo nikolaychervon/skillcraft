@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\Shared\Exceptions;
 
 use App\Http\Responses\ApiResponse;
@@ -7,21 +9,18 @@ use Illuminate\Http\JsonResponse;
 
 abstract class ApiException extends \Exception
 {
-    /**
-     * @param string|null $message
-     * @param int|null $code
-     */
-    public function __construct(?string $message = null, ?int $code = null)
-    {
+    public function __construct(
+        ?string $message = null,
+        ?int $code = null,
+        ?\Throwable $previous = null
+    ) {
         parent::__construct(
             message: $message ?? $this->getTranslatedMessage(),
-            code: $code ?? $this->getCode()
+            code: $code ?? $this->getCode(),
+            previous: $previous
         );
     }
 
-    /**
-     * @return JsonResponse
-     */
     public function render(): JsonResponse
     {
         return ApiResponse::error(
@@ -32,16 +31,13 @@ abstract class ApiException extends \Exception
     }
 
     /**
-     * @return array|null
+     * @return array<string, mixed>|null
      */
     public function getData(): ?array
     {
         return null;
     }
 
-    /**
-     * @return string
-     */
     protected function getTranslatedMessage(): string
     {
         $class = static::class;
@@ -54,9 +50,6 @@ abstract class ApiException extends \Exception
         return $message;
     }
 
-    /**
-     * @return string
-     */
     protected function generateDefaultMessage(): string
     {
         $className = class_basename($this);

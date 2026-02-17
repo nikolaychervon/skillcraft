@@ -1,26 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Domain\Auth\Actions\Email;
 
 use App\Application\Shared\Exceptions\User\Email\EmailAlreadyVerifiedException;
 use App\Domain\Auth\DTO\ResendEmailDTO;
 use App\Domain\Auth\Repositories\UserRepositoryInterface;
-use App\Infrastructure\Notifications\Auth\VerifyEmailForRegisterNotification;
+use App\Domain\Auth\Services\NotificationServiceInterface;
 use App\Models\User;
 
 class ResendEmailAction
 {
-    /**
-     * @param UserRepositoryInterface $userRepository
-     */
-    public function __construct(private UserRepositoryInterface $userRepository)
-    {
+    public function __construct(
+        private readonly UserRepositoryInterface $userRepository,
+        private readonly NotificationServiceInterface $notificationService
+    ) {
     }
 
     /**
-     * @param ResendEmailDTO $resendEmailDTO
-     * @return void
-     *
      * @throws EmailAlreadyVerifiedException
      */
     public function run(ResendEmailDTO $resendEmailDTO): void
@@ -34,6 +32,6 @@ class ResendEmailAction
             throw new EmailAlreadyVerifiedException();
         }
 
-        $user->notify(new VerifyEmailForRegisterNotification());
+        $this->notificationService->sendEmailVerificationNotification($user);
     }
 }

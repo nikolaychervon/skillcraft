@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\Shared\Exceptions\Http;
 
 use App\Application\Shared\Exceptions\ApiException;

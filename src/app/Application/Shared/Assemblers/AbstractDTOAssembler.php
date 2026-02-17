@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\Shared\Assemblers;
 
 use App\Application\Shared\DTO\BaseDTO;
@@ -12,7 +14,7 @@ abstract class AbstractDTOAssembler
     /**
      * Создаёт DTO из массива данных.
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      * @return DTO
      */
     public function assemble(array $data): BaseDTO
@@ -25,9 +27,8 @@ abstract class AbstractDTOAssembler
     /**
      * Основная сборка DTO через reflection.
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      * @return BaseDTO
-     *
      */
     protected function assembleDto(array $data): BaseDTO
     {
@@ -36,6 +37,10 @@ abstract class AbstractDTOAssembler
             $reflection = new \ReflectionClass($dtoClass);
 
             $constructor = $reflection->getConstructor();
+            if ($constructor === null) {
+                throw DTOAssemblyException::dtoClassNotFound($dtoClass, new \RuntimeException('DTO must have a constructor'));
+            }
+
             $dtoData = [];
 
             foreach ($constructor->getParameters() as $param) {
@@ -88,11 +93,11 @@ abstract class AbstractDTOAssembler
     /**
      * Кастомная валидация бизнес-правил перед сборкой DTO
      *
-     * @param array $data
+     * @param array<string, mixed> $data
      * @return void
      */
     protected function validate(array $data): void
     {
-        #
+        // Переопределите в дочерних классах для кастомной валидации
     }
 }

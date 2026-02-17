@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Application\Shared\Exceptions\User;
 
 use App\Application\Shared\Exceptions\ApiException;
@@ -9,13 +11,16 @@ class UserNotFoundException extends ApiException
 {
     protected $code = ApiResponse::HTTP_NOT_FOUND;
 
-    public function __construct(private array $searchData)
+    /**
+     * @param array<string, mixed> $searchData
+     */
+    public function __construct(private readonly array $searchData)
     {
         parent::__construct();
     }
 
     /**
-     * @return ?array{search_data: array}
+     * @return array{search_data: array<string, mixed>}
      */
     public function getData(): ?array
     {
