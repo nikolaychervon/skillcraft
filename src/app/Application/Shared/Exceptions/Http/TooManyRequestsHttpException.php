@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Application\Shared\Exceptions\Http;
 
+use App\Application\Shared\Constants\HttpCodesConstants;
 use App\Application\Shared\Exceptions\ApiException;
-use App\Http\Responses\ApiResponse;
 
 class TooManyRequestsHttpException extends ApiException
 {
-    protected $code = ApiResponse::HTTP_TOO_MANY_REQUESTS;
+    protected $code = HttpCodesConstants::HTTP_TOO_MANY_REQUESTS;
 }

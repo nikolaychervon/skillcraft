@@ -36,46 +36,52 @@ Horizon: http://localhost/horizon
 ---
 ## 📂 Структура проекта
 
+Структура показана только для нескольких модулей, но она распространяется на все. Показано только для понимания.
+
 ```bash
   gradeup-backend/
-    ├── 🐳 docker/ # Настройки контейнеров
-    ├── 🐘 docker-compose.yml # Docker-compose окружение (dev)
-    ├── 📜 Makefile # Команды для управления проектом
+    ├── 🐳 docker/                          # Настройки контейнеров
+    ├── 🐘 docker-compose.yml               # Docker-compose окружение (dev)
+    ├── 📜 Makefile                         # Команды для управления проектом
     ├── 📁 src/
     │   ├── app/
-    │   │   ├── Application/                # Слой приложения (use-cases, сборка DTO)
-    │   │   │   ├── Auth/                   # Аутентификация
-    │   │   │   ├── Profile/                # Профиль разработчика
-    │   │   │   ├── Shared/                 # Общие компоненты (DTO, assemblers, exceptions, constants)
-    │   │   │   └── .../
-    │   │   ├── Domain/                     # Домен (бизнес-логика)
-    │   │   │   └── Auth/
-    │   │   │   │    ├── Actions/           # Юзкейсы (Login/Register/Reset/etc)
-    │   │   │   │    ├── Cache/             # Доменные интерфейсы кеша
-    │   │   │   │    ├── Constants/         # Доменные константы
-    │   │   │   │    ├── DTO/               # DTO домена
-    │   │   │   │    ├── Exceptions/        # Доменные исключения
-    │   │   │   │    ├── Repositories/      # Доменные интерфейсы репозиториев
-    │   │   │   │    ├── Services/          # Доменные интерфейсы сервисов (hash/tokens/notify/tx)
-    │   │   │   │    └── Specifications/    # Спецификации (правила)
-    │   │   │   ├── Profile/
-    │   │   │   └── .../
-    │   │   ├── Infrastructure/             # Инфраструктура (Laravel/Eloquent/Cache/Notify/DB)
-    │   │   │   ├── Auth/
-    │   │   │   │   ├── Cache/              # Реализации кеша
-    │   │   │   │   ├── Repositories/       # Реализации репозиториев
-    │   │   │   │   └── Services/           # Реализации доменных сервисов
-    │   │   │   ├── Profile/
-    │   │   │   └── Notifications/          # Email-уведомления (queued)
-    │   │   │   └── .../
-    │   │   ├── Http/                       # Controllers, Requests, Responses, Middlewares
-    │   │   ├── Models/                     # Eloquent модели
-    │   │   └── Providers/                  # Service providers (bindings)
+    │   │   ├── Domain/                     # Домен (агрегат User)
+    │   │   │   └── User/
+    │   │   │       ├── Repositories/       # Интерфейсы репозиториев
+    │   │   │       ├── Exceptions/         # Общие исключения
+    │   │   │       ├── Auth/               # Модуль аутентификации: вход, регистрация, верификация, сброс пароля
+    │   │   │       │   ├── Actions/        # Экшены (бизнес логика)
+    │   │   │       │   ├── Cache/          # Интерфейсы сервисов кеша
+    │   │   │       │   ├── Constants/      # Константы
+    │   │   │       │   ├── DTO/            # DTO домена
+    │   │   │       │   ├── Exceptions/     # Исключения
+    │   │   │       │   ├── Services/       # Сервисы
+    │   │   │       │   └── Specifications/ # Спецификации
+    │   │   │       └── Profile/            # Модуль профиля: профиль, смена email/пароля
+    │   │   │           ├── Actions/        # Экшены (бизнес логика)
+    │   │   │           ├── Constants/      # Константы
+    │   │   │           ├── DTO/            # DTO домена профиля
+    │   │   │           ├── Exceptions/     # Исключения
+    │   │   │           └── Services/       # Сервисы
+    │   │   ├── Application/                # Слой приложения
+    │   │   │   ├── User/
+    │   │   │   │   ├── Auth/               # Классы для модуля аутентификации
+    │   │   │   │   └── Profile/            # Классы для модуля профиля
+    │   │   │   └── Shared/                 # Общие классы
+    │   │   ├── Infrastructure/             # Реализации (Laravel/Eloquent/Cache/Mail)
+    │   │   │   ├── User/
+    │   │   │   │   ├── Repositories/       # Реализация интерфейсов
+    │   │   │   │   ├── Auth/               # Реализация классов для модуля аутентификации
+    │   │   │   │   └── Profile/            # Реализация классов для модуля профиля
+    │   │   │   └── Notifications/          # Email-уведомления
+    │   │   ├── Http/                       # Controllers
+    │   │   ├── Models/                     # Eloquent-модели
+    │   │   └── Providers/                  # Провайдеры
     │   ├── config/                         # Конфиги Laravel
     │   ├── database/                       # Миграции, сидеры, фабрики
-    │   ├── lang/                           # Локализация (ru/en)
-    │   ├── routes/                         # Роуты (api.php v1 и т.д.)
-    │   ├── tests/                          # Unit/Feature тесты
-    │   └── .env / .env.example             # Окружение (не коммитим .env)
-    └── 📖 README.md # Ты тут :)
+    │   ├── lang/                           # Локализация (ru/en), в т.ч. exceptions
+    │   ├── routes/                         # api.php роутинг
+    │   ├── tests/                          # Unit
+    │   └── .env / .env.example             # Окружение
+    └── 📖 README.md                        # Ты тут :)
 ```

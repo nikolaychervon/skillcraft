@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\Auth\Actions\CreateNewUserAction;
-use App\Domain\Auth\Actions\RegisterUserAction;
-use App\Domain\Auth\DTO\CreatingUserDTO;
-use App\Domain\Auth\Repositories\UserRepositoryInterface;
-use App\Domain\Auth\Services\NotificationServiceInterface;
+use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Domain\User\Auth\Actions\RegisterUserAction;
+use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\Services\NotificationServiceInterface;
+use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Profile;
 
-use App\Application\Shared\Exceptions\User\Email\InvalidConfirmationLinkException;
-use App\Application\Shared\Exceptions\User\UserNotFoundException;
-use App\Domain\Profile\Actions\VerifyEmailChangeAction;
+use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
+use App\Domain\User\Exceptions\UserNotFoundException;
+use App\Domain\User\Profile\Actions\VerifyEmailChangeAction;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;

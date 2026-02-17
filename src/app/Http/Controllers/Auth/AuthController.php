@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Application\Auth\Assemblers\CreatingUserDTOAssembler;
-use App\Application\Auth\Assemblers\LoginUserDTOAssembler;
-use App\Domain\Auth\Actions\LoginUserAction;
-use App\Domain\Auth\Actions\LogoutAllUserAction;
-use App\Domain\Auth\Actions\LogoutUserAction;
-use App\Domain\Auth\Actions\RegisterUserAction;
-use App\Domain\Auth\Exceptions\IncorrectLoginDataException;
+use App\Application\Shared\Constants\HttpCodesConstants;
+use App\Application\User\Auth\Assemblers\CreatingUserDTOAssembler;
+use App\Application\User\Auth\Assemblers\LoginUserDTOAssembler;
+use App\Domain\User\Auth\Actions\LoginUserAction;
+use App\Domain\User\Auth\Actions\LogoutAllUserAction;
+use App\Domain\User\Auth\Actions\LogoutUserAction;
+use App\Domain\User\Auth\Actions\RegisterUserAction;
+use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -60,7 +61,7 @@ class AuthController extends Controller
                 'user_id' => $user->id,
                 'email' => $user->email,
             ],
-            code: ApiResponse::HTTP_CREATED,
+            code: HttpCodesConstants::HTTP_CREATED,
         );
     }
 

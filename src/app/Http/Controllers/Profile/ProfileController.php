@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Profile;
 
-use App\Application\Profile\Assemblers\ChangeDeveloperEmailDTOAssembler;
-use App\Application\Profile\Assemblers\ChangeDeveloperPasswordDTOAssembler;
-use App\Application\Profile\Assemblers\UpdateDeveloperProfileDTOAssembler;
-use App\Domain\Profile\Actions\ChangeDeveloperEmailAction;
-use App\Domain\Profile\Actions\ChangeDeveloperPasswordAction;
-use App\Domain\Profile\Actions\GetDeveloperProfileAction;
-use App\Domain\Profile\Actions\UpdateDeveloperProfileAction;
-use App\Domain\Profile\Exceptions\IncorrectCurrentPasswordException;
+use App\Application\User\Profile\Assemblers\ChangeUserEmailDTOAssembler;
+use App\Application\User\Profile\Assemblers\ChangeUserPasswordDTOAssembler;
+use App\Application\User\Profile\Assemblers\UpdateUserProfileDTOAssembler;
+use App\Domain\User\Profile\Actions\ChangeUserEmailAction;
+use App\Domain\User\Profile\Actions\ChangeUserPasswordAction;
+use App\Domain\User\Profile\Actions\GetUserProfileAction;
+use App\Domain\User\Profile\Actions\UpdateUserProfileAction;
+use App\Domain\User\Profile\Exceptions\IncorrectCurrentPasswordException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\ChangeEmailRequest;
 use App\Http\Requests\Profile\ChangePasswordRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
-use App\Http\Resources\Profile\DeveloperProfileResource;
+use App\Http\Resources\Profile\UserProfileResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -24,49 +24,34 @@ use Illuminate\Http\Request;
 class ProfileController extends Controller
 {
     public function __construct(
-        private readonly UpdateDeveloperProfileDTOAssembler $updateDeveloperProfileDTOAssembler,
-        private readonly ChangeDeveloperEmailDTOAssembler $changeDeveloperEmailDTOAssembler,
-        private readonly ChangeDeveloperPasswordDTOAssembler $changeDeveloperPasswordDTOAssembler,
+        private readonly UpdateUserProfileDTOAssembler $updateUserProfileDTOAssembler,
+        private readonly ChangeUserEmailDTOAssembler $changeUserEmailDTOAssembler,
+        private readonly ChangeUserPasswordDTOAssembler $changeUserPasswordDTOAssembler,
     ) {
     }
 
-    /**
-     * @param Request $request
-     * @param GetDeveloperProfileAction $action
-     * @return JsonResponse
-     */
-    public function show(Request $request, GetDeveloperProfileAction $action): JsonResponse
+    public function show(Request $request, GetUserProfileAction $action): JsonResponse
     {
-        $developerProfile = $action->run($request->user());
-        return ApiResponse::success(data: DeveloperProfileResource::make($developerProfile));
+        $user = $action->run($request->user());
+        return ApiResponse::success(data: UserProfileResource::make($user));
     }
 
-    /**
-     * @param UpdateProfileRequest $request
-     * @param UpdateDeveloperProfileAction $action
-     * @return JsonResponse
-     */
-    public function update(UpdateProfileRequest $request, UpdateDeveloperProfileAction $action): JsonResponse
+    public function update(UpdateProfileRequest $request, UpdateUserProfileAction $action): JsonResponse
     {
-        $dto = $this->updateDeveloperProfileDTOAssembler->assemble($request->validated());
-        $developerProfile = $action->run($request->user(), $dto);
+        $dto = $this->updateUserProfileDTOAssembler->assemble($request->validated());
+        $user = $action->run($request->user(), $dto);
 
         return ApiResponse::success(
             message: __('messages.profile-updated'),
-            data: DeveloperProfileResource::make($developerProfile),
+            data: UserProfileResource::make($user),
         );
     }
 
-    /**
-     * @param ChangeEmailRequest $request
-     * @param ChangeDeveloperEmailAction $action
-     * @return JsonResponse
-     */
-    public function changeEmail(ChangeEmailRequest $request, ChangeDeveloperEmailAction $action): JsonResponse
+    public function changeEmail(ChangeEmailRequest $request, ChangeUserEmailAction $action): JsonResponse
     {
-        $developerProfile = $request->user();
-        $dto = $this->changeDeveloperEmailDTOAssembler->assemble($request->validated());
-        $action->run($developerProfile, $dto);
+        $user = $request->user();
+        $dto = $this->changeUserEmailDTOAssembler->assemble($request->validated());
+        $action->run($user, $dto);
 
         return ApiResponse::success(
             message: __('messages.email-verify'),
@@ -75,15 +60,11 @@ class ProfileController extends Controller
     }
 
     /**
-     * @param ChangePasswordRequest $request
-     * @param ChangeDeveloperPasswordAction $action
-     * @return JsonResponse
-     *
      * @throws IncorrectCurrentPasswordException
      */
-    public function changePassword(ChangePasswordRequest $request, ChangeDeveloperPasswordAction $action): JsonResponse
+    public function changePassword(ChangePasswordRequest $request, ChangeUserPasswordAction $action): JsonResponse
     {
-        $dto = $this->changeDeveloperPasswordDTOAssembler->assemble($request->validated());
+        $dto = $this->changeUserPasswordDTOAssembler->assemble($request->validated());
         $action->run($request->user(), $dto);
 
         return ApiResponse::success(message: __('messages.password-changed'));

@@ -3,13 +3,13 @@
 use App\Application\Shared\Exceptions\Http\NotFoundHttpException;
 use App\Application\Shared\Exceptions\Http\TooManyRequestsHttpException;
 use App\Application\Shared\Exceptions\Http\UnauthorizedException;
-use App\Application\Shared\Exceptions\User\Email\EmailAlreadyVerifiedException;
-use App\Application\Shared\Exceptions\User\Email\InvalidConfirmationLinkException;
-use App\Application\Shared\Exceptions\User\UserNotFoundException;
-use App\Domain\Auth\Exceptions\IncorrectLoginDataException;
-use App\Domain\Auth\Exceptions\InvalidResetTokenException;
-use App\Domain\Auth\Exceptions\PasswordResetFailedException;
-use App\Domain\Profile\Exceptions\IncorrectCurrentPasswordException;
+use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
+use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
+use App\Domain\User\Exceptions\UserNotFoundException;
+use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
+use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
+use App\Domain\User\Auth\Exceptions\PasswordResetFailedException;
+use App\Domain\User\Profile\Exceptions\IncorrectCurrentPasswordException;
 
 return [
     IncorrectLoginDataException::class => 'Неверный email или пароль',

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Notifications\Profile;
 
-use App\Domain\Profile\Constants\ProfileConstants;
+use App\Domain\User\Profile\Constants\ProfileConstants;
 use App\Infrastructure\Notifications\Base\EmailNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\URL;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\URL;
 class VerifyEmailChangeNotification extends EmailNotification
 {
     public function __construct(
-        private readonly int $developerProfileId,
+        private readonly int $userId,
         private readonly string $name,
         private readonly string $pendingEmail
     ) {
@@ -35,7 +35,7 @@ class VerifyEmailChangeNotification extends EmailNotification
             'profile.email-change.verify',
             now()->addMinutes(ProfileConstants::EMAIL_CHANGE_VERIFICATION_TTL),
             [
-                'id' => $this->developerProfileId,
+                'id' => $this->userId,
                 'hash' => sha1($this->pendingEmail),
             ]
         );

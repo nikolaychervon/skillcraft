@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Domain\Auth\Actions\CreateNewUserAction;
-use App\Domain\Auth\DTO\CreatingUserDTO;
-use App\Domain\Auth\Exceptions\IncorrectLoginDataException;
+use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

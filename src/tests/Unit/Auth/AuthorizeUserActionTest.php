@@ -2,11 +2,11 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Application\Auth\Assemblers\LoginUserDTOAssembler;
-use App\Domain\Auth\Actions\LoginUserAction;
-use App\Domain\Auth\Actions\CreateNewUserAction;
-use App\Domain\Auth\DTO\CreatingUserDTO;
-use App\Domain\Auth\Exceptions\IncorrectLoginDataException;
+use App\Application\User\Auth\Assemblers\LoginUserDTOAssembler;
+use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Domain\User\Auth\Actions\LoginUserAction;
+use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\Auth\Actions\CreateNewUserAction;
-use App\Domain\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Domain\User\Auth\DTO\CreatingUserDTO;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
