@@ -7,4 +7,7 @@ return [
     'email-already-confirmed' => 'Email уже подтверждён',
     'password-reset-link' => 'Если указанный email зарегистрирован, мы отправили на него ссылку для сброса пароля',
     'password-reset-successful' => 'Пароль успешно изменён. Выполнен автоматический вход',
+    'profile-updated' => 'Профиль обновлён',
+    'password-changed' => 'Пароль обновлён',
+    'email-change-confirmed' => 'Email успешно изменён и подтверждён',
 ];

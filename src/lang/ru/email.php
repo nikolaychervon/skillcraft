@@ -2,6 +2,7 @@
 
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
 use App\Infrastructure\Notifications\Auth\VerifyEmailForRegisterNotification;
+use App\Infrastructure\Notifications\Profile\VerifyEmailChangeNotification;
 
 return [
     VerifyEmailForRegisterNotification::class => [
@@ -33,6 +34,22 @@ return [
         'lines_2' => [
             'Ссылка действительна в течение :expires_minutes минут.',
             'Если вы не запрашивали сброс пароля, просто проигнорируйте это письмо.',
+        ],
+    ],
+    VerifyEmailChangeNotification::class => [
+        'subject' => 'Подтверждение смены email на GradeUP',
+        'greeting' => 'Здравствуйте, :name!',
+        'lines_1' => [
+            'Вы запросили смену email для вашей учётной записи на GradeUP.',
+            'Подтвердите новый email (:pending_email), перейдя по ссылке:',
+        ],
+        'action' => [
+            'text' => 'Подтвердить новый email',
+            'url' => ':verification_url',
+        ],
+        'lines_2' => [
+            'Ссылка действительна в течение 60 минут.',
+            'Если вы не запрашивали смену email — просто проигнорируйте это письмо.',
         ],
     ],
 ];

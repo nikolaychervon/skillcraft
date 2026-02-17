@@ -24,4 +24,3 @@ class ApiExceptionRenderTest extends TestCase
         $this->assertArrayNotHasKey('errors', $payload);
     }
 }
-

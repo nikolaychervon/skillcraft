@@ -2,6 +2,7 @@
 
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
 use App\Infrastructure\Notifications\Auth\VerifyEmailForRegisterNotification;
+use App\Infrastructure\Notifications\Profile\VerifyEmailChangeNotification;
 
 return [
     VerifyEmailForRegisterNotification::class => [
@@ -33,6 +34,22 @@ return [
         'lines_2' => [
             'The link is valid for :expires_minutes minutes.',
             'If you did not request a password reset, simply ignore this email.',
+        ],
+    ],
+    VerifyEmailChangeNotification::class => [
+        'subject' => 'GradeUP email change confirmation',
+        'greeting' => 'Hello, :name!',
+        'lines_1' => [
+            'You requested to change the email address for your GradeUP account.',
+            'Please confirm your new email (:pending_email) by clicking the link below:',
+        ],
+        'action' => [
+            'text' => 'Confirm new email',
+            'url' => ':verification_url',
+        ],
+        'lines_2' => [
+            'The link is valid for 60 minutes.',
+            'If you did not request an email change, please ignore this email.',
         ],
     ],
 ];

@@ -28,4 +28,3 @@ class LogoutUserActionTest extends TestCase
         $action->run($user);
     }
 }
-

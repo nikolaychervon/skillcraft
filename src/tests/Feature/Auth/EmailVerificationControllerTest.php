@@ -1,6 +1,6 @@
 <?php
 
-namespace Feature\Auth;
+namespace Tests\Feature\Auth;
 
 use App\Application\Shared\Exceptions\User\Email\EmailAlreadyVerifiedException;
 use App\Domain\Auth\Actions\CreateNewUserAction;

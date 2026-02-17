@@ -7,4 +7,7 @@ return [
     'email-already-confirmed' => 'Email has already been confirmed',
     'password-reset-link' => 'If the email you provided is registered, we have sent a link to reset your password to it',
     'password-reset-successful' => 'Your password has been successfully changed. You have been automatically logged in.',
+    'profile-updated' => 'Profile updated',
+    'password-changed' => 'Password updated',
+    'email-change-confirmed' => 'Email successfully changed and confirmed',
 ];

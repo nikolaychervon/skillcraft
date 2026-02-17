@@ -9,6 +9,7 @@ use App\Application\Shared\Exceptions\User\UserNotFoundException;
 use App\Domain\Auth\Exceptions\IncorrectLoginDataException;
 use App\Domain\Auth\Exceptions\InvalidResetTokenException;
 use App\Domain\Auth\Exceptions\PasswordResetFailedException;
+use App\Domain\Profile\Exceptions\IncorrectCurrentPasswordException;
 
 return [
     IncorrectLoginDataException::class => 'Неверный email или пароль',
@@ -20,4 +21,5 @@ return [
     UserNotFoundException::class => 'Пользователь не найден',
     PasswordResetFailedException::class => 'Не удалось сбросить пароль. Пожалуйста, попробуйте снова.',
     TooManyRequestsHttpException::class => 'Слишком много частых запросов.',
+    IncorrectCurrentPasswordException::class => 'Текущий пароль указан неверно.',
 ];

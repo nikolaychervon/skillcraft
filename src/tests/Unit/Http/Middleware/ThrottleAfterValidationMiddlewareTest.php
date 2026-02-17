@@ -68,4 +68,3 @@ class ThrottleAfterValidationMiddlewareTest extends TestCase
         $this->assertSame(422, $response->getStatusCode());
     }
 }
-

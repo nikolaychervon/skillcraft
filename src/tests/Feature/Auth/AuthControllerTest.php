@@ -1,6 +1,6 @@
 <?php
 
-namespace Feature\Auth;
+namespace Tests\Feature\Auth;
 
 use App\Domain\Auth\Actions\CreateNewUserAction;
 use App\Domain\Auth\DTO\CreatingUserDTO;

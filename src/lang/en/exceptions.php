@@ -9,6 +9,7 @@ use App\Application\Shared\Exceptions\User\UserNotFoundException;
 use App\Domain\Auth\Exceptions\IncorrectLoginDataException;
 use App\Domain\Auth\Exceptions\InvalidResetTokenException;
 use App\Domain\Auth\Exceptions\PasswordResetFailedException;
+use App\Domain\Profile\Exceptions\IncorrectCurrentPasswordException;
 
 return [
     IncorrectLoginDataException::class => 'Incorrect email address or password',
@@ -20,4 +21,5 @@ return [
     UserNotFoundException::class => 'User not found',
     PasswordResetFailedException::class => 'Failed to reset your password. Please try again.',
     TooManyRequestsHttpException::class => 'Too Many Attempts.',
+    IncorrectCurrentPasswordException::class => 'Incorrect current password.',
 ];

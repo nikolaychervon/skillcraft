@@ -11,6 +11,8 @@ use App\Domain\Auth\Services\NotificationServiceInterface;
 use App\Domain\Auth\Services\TokenGeneratorInterface;
 use App\Domain\Auth\Services\TokenServiceInterface;
 use App\Domain\Auth\Services\TransactionServiceInterface;
+use App\Domain\Profile\Repositories\DeveloperProfileRepositoryInterface;
+use App\Domain\Profile\Services\DeveloperProfileNotificationServiceInterface;
 use App\Infrastructure\Auth\Cache\PasswordResetTokensCache;
 use App\Infrastructure\Auth\Repositories\UserRepository;
 use App\Infrastructure\Auth\Services\HashService;
@@ -18,6 +20,8 @@ use App\Infrastructure\Auth\Services\NotificationService;
 use App\Infrastructure\Auth\Services\TokenGenerator;
 use App\Infrastructure\Auth\Services\TokenService;
 use App\Infrastructure\Auth\Services\TransactionService;
+use App\Infrastructure\Profile\Repositories\DeveloperProfileRepository;
+use App\Infrastructure\Profile\Services\DeveloperProfileNotificationService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -25,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     public $bindings = [
         // Repositories
         UserRepositoryInterface::class => UserRepository::class,
+        DeveloperProfileRepositoryInterface::class => DeveloperProfileRepository::class,
 
         // Cache
         PasswordResetTokensCacheInterface::class => PasswordResetTokensCache::class,
@@ -35,5 +40,6 @@ class AppServiceProvider extends ServiceProvider
         NotificationServiceInterface::class => NotificationService::class,
         TokenGeneratorInterface::class => TokenGenerator::class,
         TransactionServiceInterface::class => TransactionService::class,
+        DeveloperProfileNotificationServiceInterface::class => DeveloperProfileNotificationService::class,
     ];
 }

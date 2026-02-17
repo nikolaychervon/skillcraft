@@ -103,4 +103,3 @@ class RegisterUserActionTest extends TestCase
         $this->assertSame($existingUser, $result);
     }
 }
-

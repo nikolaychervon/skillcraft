@@ -8,4 +8,3 @@ readonly class TestNoConstructorDTO extends BaseDTO
 {
     // Intentionally no constructor
 }
-
