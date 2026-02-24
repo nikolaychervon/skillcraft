@@ -75,7 +75,7 @@ migrate:
 	@echo "$(BOLD)$(GREEN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)"
 	@echo "$(BOLD)$(BG_GREEN)$(WHITE)  🗄️ Запуск миграций базы данных  $(RESET)"
 	@echo "$(GREEN)  → Запуск php artisan migrate...$(RESET)"
-	$(ARTISAN) migrate
+	$(ARTISAN) migrate --seed
 	@echo "$(GREEN)  ✅ Миграции успешно выполнены!$(RESET)"
 	@echo "$(BOLD)$(GREEN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 
