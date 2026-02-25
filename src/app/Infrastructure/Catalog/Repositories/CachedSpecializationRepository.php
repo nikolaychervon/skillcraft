@@ -34,17 +34,4 @@ final class CachedSpecializationRepository implements SpecializationRepositoryIn
     {
         return $this->specializationRepository->findById($id);
     }
-
-    public function getLanguagesBySpecializationId(int $specializationId): Collection
-    {
-        $cached = $this->cache->getSpecializationLanguages($specializationId);
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        $data = $this->specializationRepository->getLanguagesBySpecializationId($specializationId);
-        $this->cache->putSpecializationLanguages($specializationId, $data);
-
-        return $data;
-    }
 }

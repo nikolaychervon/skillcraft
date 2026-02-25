@@ -22,15 +22,4 @@ final class SpecializationRepository implements SpecializationRepositoryInterfac
     {
         return Specialization::query()->find($id);
     }
-
-    public function getLanguagesBySpecializationId(int $specializationId): Collection
-    {
-        $specialization = Specialization::query()
-            ->with('programmingLanguages')
-            ->find($specializationId);
-
-        return $specialization !== null
-            ? $specialization->programmingLanguages
-            : collect();
-    }
 }

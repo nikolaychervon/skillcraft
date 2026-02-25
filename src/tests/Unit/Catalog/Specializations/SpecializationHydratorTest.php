@@ -1,29 +1,29 @@
 <?php
 
-namespace Tests\Unit\Catalog;
+namespace Tests\Unit\Catalog\Specializations;
 
-use App\Infrastructure\Catalog\Hydrators\ProgrammingLanguageHydrator;
-use App\Models\ProgrammingLanguage;
+use App\Infrastructure\Catalog\Hydrators\SpecializationHydrator;
+use App\Models\Specialization;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
 
-class ProgrammingLanguageHydratorTest extends TestCase
+class SpecializationHydratorTest extends TestCase
 {
-    private ProgrammingLanguageHydrator $hydrator;
+    private SpecializationHydrator $hydrator;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->hydrator = new ProgrammingLanguageHydrator();
+        $this->hydrator = new SpecializationHydrator();
     }
 
     public function test_to_array_returns_model_attributes(): void
     {
-        $model = new ProgrammingLanguage();
+        $model = new Specialization();
         $model->setRawAttributes([
             'id' => 1,
-            'key' => 'php',
-            'name' => 'PHP',
+            'key' => 'backend',
+            'name' => 'Backend',
             'created_at' => '2026-01-01 00:00:00',
             'updated_at' => '2026-01-01 00:00:00',
         ]);
@@ -35,33 +35,33 @@ class ProgrammingLanguageHydratorTest extends TestCase
         $this->assertArrayHasKey('key', $result);
         $this->assertArrayHasKey('name', $result);
         $this->assertSame(1, $result['id']);
-        $this->assertSame('php', $result['key']);
-        $this->assertSame('PHP', $result['name']);
+        $this->assertSame('backend', $result['key']);
+        $this->assertSame('Backend', $result['name']);
     }
 
     public function test_from_array_returns_model_with_attributes(): void
     {
         $data = [
             'id' => 2,
-            'key' => 'javascript',
-            'name' => 'JavaScript',
+            'key' => 'frontend',
+            'name' => 'Frontend',
             'created_at' => '2026-01-02 00:00:00',
             'updated_at' => '2026-01-02 00:00:00',
         ];
 
         $model = $this->hydrator->fromArray($data);
 
-        $this->assertInstanceOf(ProgrammingLanguage::class, $model);
+        $this->assertInstanceOf(Specialization::class, $model);
         $this->assertSame(2, $model->id);
-        $this->assertSame('javascript', $model->key);
-        $this->assertSame('JavaScript', $model->name);
+        $this->assertSame('frontend', $model->key);
+        $this->assertSame('Frontend', $model->name);
     }
 
     public function test_to_array_collection_serializes_collection(): void
     {
         $models = collect([
-            (new ProgrammingLanguage())->setRawAttributes(['id' => 1, 'key' => 'php', 'name' => 'PHP', 'created_at' => null, 'updated_at' => null]),
-            (new ProgrammingLanguage())->setRawAttributes(['id' => 2, 'key' => 'js', 'name' => 'JS', 'created_at' => null, 'updated_at' => null]),
+            (new Specialization())->setRawAttributes(['id' => 1, 'key' => 'a', 'name' => 'A', 'created_at' => null, 'updated_at' => null]),
+            (new Specialization())->setRawAttributes(['id' => 2, 'key' => 'b', 'name' => 'B', 'created_at' => null, 'updated_at' => null]),
         ]);
 
         $result = $this->hydrator->toArrayCollection($models);
@@ -69,33 +69,34 @@ class ProgrammingLanguageHydratorTest extends TestCase
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertSame(1, $result[0]['id']);
-        $this->assertSame('php', $result[0]['key']);
+        $this->assertSame('a', $result[0]['key']);
         $this->assertSame(2, $result[1]['id']);
+        $this->assertSame('b', $result[1]['key']);
     }
 
     public function test_from_array_collection_deserializes_to_collection(): void
     {
         $data = [
-            ['id' => 10, 'key' => 'go', 'name' => 'Go', 'created_at' => null, 'updated_at' => null],
-            ['id' => 20, 'key' => 'rust', 'name' => 'Rust', 'created_at' => null, 'updated_at' => null],
+            ['id' => 10, 'key' => 'x', 'name' => 'X', 'created_at' => null, 'updated_at' => null],
+            ['id' => 20, 'key' => 'y', 'name' => 'Y', 'created_at' => null, 'updated_at' => null],
         ];
 
         $collection = $this->hydrator->fromArrayCollection($data);
 
         $this->assertInstanceOf(Collection::class, $collection);
         $this->assertCount(2, $collection);
-        $this->assertInstanceOf(ProgrammingLanguage::class, $collection->first());
+        $this->assertInstanceOf(Specialization::class, $collection->first());
         $this->assertSame(10, $collection->first()->id);
         $this->assertSame(20, $collection->get(1)->id);
     }
 
     public function test_roundtrip_to_array_and_from_array_preserves_data(): void
     {
-        $model = new ProgrammingLanguage();
+        $model = new Specialization();
         $model->setRawAttributes([
             'id' => 7,
             'key' => 'roundtrip',
-            'name' => 'Roundtrip Lang',
+            'name' => 'Roundtrip',
             'created_at' => '2026-02-01 12:00:00',
             'updated_at' => '2026-02-01 12:00:00',
         ]);

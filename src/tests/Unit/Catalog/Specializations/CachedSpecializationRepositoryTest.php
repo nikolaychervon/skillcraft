@@ -1,11 +1,10 @@
 <?php
 
-namespace Tests\Unit\Catalog;
+namespace Tests\Unit\Catalog\Specializations;
 
 use App\Domain\Catalog\Cache\CatalogCacheInterface;
 use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
 use App\Infrastructure\Catalog\Repositories\CachedSpecializationRepository;
-use App\Models\ProgrammingLanguage;
 use App\Models\Specialization;
 use Illuminate\Support\Collection;
 use Mockery;
@@ -93,50 +92,5 @@ class CachedSpecializationRepositoryTest extends TestCase
         $repo = new CachedSpecializationRepository($innerRepo, Mockery::mock(CatalogCacheInterface::class));
 
         $this->assertNull($repo->findById(999));
-    }
-
-    public function test_get_languages_by_specialization_id_returns_cached_when_hit(): void
-    {
-        $cached = collect([
-            new ProgrammingLanguage(['id' => 1, 'key' => 'php', 'name' => 'PHP']),
-        ]);
-
-        $cache = Mockery::mock(CatalogCacheInterface::class);
-        $cache->shouldReceive('getSpecializationLanguages')
-            ->once()
-            ->with(5)
-            ->andReturn($cached);
-        $cache->shouldNotReceive('putSpecializationLanguages');
-
-        $innerRepo = Mockery::mock(SpecializationRepositoryInterface::class);
-        $innerRepo->shouldNotReceive('getLanguagesBySpecializationId');
-
-        $repo = new CachedSpecializationRepository($innerRepo, $cache);
-
-        $result = $repo->getLanguagesBySpecializationId(5);
-
-        $this->assertSame($cached, $result);
-    }
-
-    public function test_get_languages_by_specialization_id_calls_inner_and_puts_to_cache_when_miss(): void
-    {
-        $fromDb = collect([
-            new ProgrammingLanguage(['id' => 1, 'key' => 'js', 'name' => 'JavaScript']),
-        ]);
-
-        $cache = Mockery::mock(CatalogCacheInterface::class);
-        $cache->shouldReceive('getSpecializationLanguages')->once()->with(3)->andReturn(null);
-        $cache->shouldReceive('putSpecializationLanguages')
-            ->once()
-            ->with(3, Mockery::on(fn (Collection $c): bool => $c->count() === 1 && $c->first()->key === 'js'));
-
-        $innerRepo = Mockery::mock(SpecializationRepositoryInterface::class);
-        $innerRepo->shouldReceive('getLanguagesBySpecializationId')->once()->with(3)->andReturn($fromDb);
-
-        $repo = new CachedSpecializationRepository($innerRepo, $cache);
-
-        $result = $repo->getLanguagesBySpecializationId(3);
-
-        $this->assertSame($fromDb, $result);
     }
 }

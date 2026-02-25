@@ -1,9 +1,9 @@
 <?php
 
-namespace Tests\Unit\Catalog;
+namespace Tests\Unit\Catalog\Specializations;
 
 use App\Domain\Catalog\Actions\GetSpecializationLanguagesAction;
-use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
+use App\Domain\Catalog\Repositories\ProgrammingLanguageRepositoryInterface;
 use App\Models\ProgrammingLanguage;
 use Illuminate\Support\Collection;
 use Mockery;
@@ -22,8 +22,8 @@ class GetSpecializationLanguagesActionTest extends TestCase
             new ProgrammingLanguage(['id' => 2, 'key' => 'js', 'name' => 'JavaScript']),
         ]);
 
-        $repo = Mockery::mock(SpecializationRepositoryInterface::class);
-        $repo->shouldReceive('getLanguagesBySpecializationId')
+        $repo = Mockery::mock(ProgrammingLanguageRepositoryInterface::class);
+        $repo->shouldReceive('getBySpecializationId')
             ->once()
             ->with($specializationId)
             ->andReturn($languages);
@@ -39,8 +39,8 @@ class GetSpecializationLanguagesActionTest extends TestCase
 
     public function test_it_returns_empty_collection_when_no_languages(): void
     {
-        $repo = Mockery::mock(SpecializationRepositoryInterface::class);
-        $repo->shouldReceive('getLanguagesBySpecializationId')
+        $repo = Mockery::mock(ProgrammingLanguageRepositoryInterface::class);
+        $repo->shouldReceive('getBySpecializationId')
             ->once()
             ->with(99)
             ->andReturn(collect());

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Catalog;
+namespace Tests\Unit\Catalog\Specializations;
 
 use App\Domain\Catalog\Actions\GetSpecializationsAction;
 use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
