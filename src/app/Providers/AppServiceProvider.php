@@ -4,15 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Domain\Catalog\Cache\CatalogCacheInterface;
-use App\Domain\Catalog\Repositories\ProgrammingLanguageRepositoryInterface;
-use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
-use App\Infrastructure\Catalog\Cache\CatalogCache;
-use App\Infrastructure\Catalog\Repositories\CachedProgrammingLanguageRepository;
-use App\Infrastructure\Catalog\Repositories\CachedSpecializationRepository;
-use App\Infrastructure\Catalog\Repositories\ProgrammingLanguageRepository;
-use App\Infrastructure\Catalog\Repositories\SpecializationRepository;
 use App\Domain\User\Auth\Services\HashServiceInterface;
 use App\Domain\User\Auth\Services\NotificationServiceInterface;
 use App\Domain\User\Auth\Services\TokenGeneratorInterface;
@@ -33,11 +25,6 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
     public $bindings = [
-        // Catalog
-        CatalogCacheInterface::class => CatalogCache::class,
-        SpecializationRepositoryInterface::class => CachedSpecializationRepository::class,
-        ProgrammingLanguageRepositoryInterface::class => CachedProgrammingLanguageRepository::class,
-
         // User aggregate repository
         UserRepositoryInterface::class => UserRepository::class,
 
@@ -54,15 +41,4 @@ class AppServiceProvider extends ServiceProvider
         // Profile services
         ProfileNotificationServiceInterface::class => ProfileNotificationService::class,
     ];
-
-    public function register(): void
-    {
-        $this->app->when(CachedSpecializationRepository::class)
-            ->needs(SpecializationRepositoryInterface::class)
-            ->give(SpecializationRepository::class);
-
-        $this->app->when(CachedProgrammingLanguageRepository::class)
-            ->needs(ProgrammingLanguageRepositoryInterface::class)
-            ->give(ProgrammingLanguageRepository::class);
-    }
 }
