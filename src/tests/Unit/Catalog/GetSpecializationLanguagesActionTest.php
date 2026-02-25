@@ -1,0 +1,54 @@
+<?php
+
+namespace Tests\Unit\Catalog;
+
+use App\Domain\Catalog\Actions\GetSpecializationLanguagesAction;
+use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
+use App\Models\ProgrammingLanguage;
+use Illuminate\Support\Collection;
+use Mockery;
+use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
+use Tests\TestCase;
+
+class GetSpecializationLanguagesActionTest extends TestCase
+{
+    use MockeryPHPUnitIntegration;
+
+    public function test_it_returns_languages_for_specialization_from_repository(): void
+    {
+        $specializationId = 5;
+        $languages = collect([
+            new ProgrammingLanguage(['id' => 1, 'key' => 'php', 'name' => 'PHP']),
+            new ProgrammingLanguage(['id' => 2, 'key' => 'js', 'name' => 'JavaScript']),
+        ]);
+
+        $repo = Mockery::mock(SpecializationRepositoryInterface::class);
+        $repo->shouldReceive('getLanguagesBySpecializationId')
+            ->once()
+            ->with($specializationId)
+            ->andReturn($languages);
+
+        $action = new GetSpecializationLanguagesAction($repo);
+
+        $result = $action->run($specializationId);
+
+        $this->assertInstanceOf(Collection::class, $result);
+        $this->assertCount(2, $result);
+        $this->assertSame($languages, $result);
+    }
+
+    public function test_it_returns_empty_collection_when_no_languages(): void
+    {
+        $repo = Mockery::mock(SpecializationRepositoryInterface::class);
+        $repo->shouldReceive('getLanguagesBySpecializationId')
+            ->once()
+            ->with(99)
+            ->andReturn(collect());
+
+        $action = new GetSpecializationLanguagesAction($repo);
+
+        $result = $action->run(99);
+
+        $this->assertTrue($result->isEmpty());
+    }
+}

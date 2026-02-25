@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 final class CachedSpecializationRepository implements SpecializationRepositoryInterface
 {
     public function __construct(
-        private readonly SpecializationRepository $specializationRepository,
+        private readonly SpecializationRepositoryInterface $specializationRepository,
         private readonly CatalogCacheInterface $cache,
     ) {
     }

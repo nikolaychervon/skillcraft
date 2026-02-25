@@ -9,6 +9,7 @@ use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
 use App\Infrastructure\Catalog\Cache\CatalogCache;
 use App\Infrastructure\Catalog\Repositories\CachedSpecializationRepository;
+use App\Infrastructure\Catalog\Repositories\SpecializationRepository;
 use App\Domain\User\Auth\Services\HashServiceInterface;
 use App\Domain\User\Auth\Services\NotificationServiceInterface;
 use App\Domain\User\Auth\Services\TokenGeneratorInterface;
@@ -49,4 +50,11 @@ class AppServiceProvider extends ServiceProvider
         // Profile services
         ProfileNotificationServiceInterface::class => ProfileNotificationService::class,
     ];
+
+    public function register(): void
+    {
+        $this->app->when(CachedSpecializationRepository::class)
+            ->needs(SpecializationRepositoryInterface::class)
+            ->give(SpecializationRepository::class);
+    }
 }
