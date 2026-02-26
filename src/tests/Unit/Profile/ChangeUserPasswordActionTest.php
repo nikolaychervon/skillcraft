@@ -3,7 +3,7 @@
 namespace Tests\Unit\Profile;
 
 use App\Domain\User\Auth\Services\HashServiceInterface;
-use App\Domain\User\Profile\Actions\ChangeUserPasswordAction;
+use App\Application\User\Profile\ChangeUserPassword;
 use App\Domain\User\Profile\RequestData\ChangeUserPasswordRequestData;
 use App\Domain\User\Profile\Exceptions\IncorrectCurrentPasswordException;
 use App\Domain\User\Repositories\UserRepositoryInterface;
@@ -20,7 +20,7 @@ class ChangeUserPasswordActionTest extends TestCase
     {
         $repo = Mockery::mock(UserRepositoryInterface::class);
         $hash = Mockery::mock(HashServiceInterface::class);
-        $action = new ChangeUserPasswordAction($repo, $hash);
+        $action = new ChangeUserPassword($repo, $hash);
 
         $user = new User();
         $user->password = 'hashed';
@@ -38,7 +38,7 @@ class ChangeUserPasswordActionTest extends TestCase
     {
         $repo = Mockery::mock(UserRepositoryInterface::class);
         $hash = Mockery::mock(HashServiceInterface::class);
-        $action = new ChangeUserPasswordAction($repo, $hash);
+        $action = new ChangeUserPassword($repo, $hash);
 
         $user = new User();
         $user->password = 'hashed';

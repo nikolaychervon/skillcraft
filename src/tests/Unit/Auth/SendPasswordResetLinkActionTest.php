@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\SendPasswordResetLink;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
@@ -16,7 +16,7 @@ class SendPasswordResetLinkActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private SendPasswordResetLinkAction $action;
+    private SendPasswordResetLink $action;
     private PasswordResetTokensCacheInterface $cache;
     private User $user;
     private string $email = 'test@example.com';
@@ -24,12 +24,12 @@ class SendPasswordResetLinkActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(SendPasswordResetLinkAction::class);
+        $this->action = app(SendPasswordResetLink::class);
         $this->cache = app(PasswordResetTokensCacheInterface::class);
 
         Notification::fake();
 
-        $createUserAction = app(CreateNewUserAction::class);
+        $createUserAction = app(CreateNewUser::class);
         $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',

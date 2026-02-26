@@ -2,20 +2,19 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\User\Auth\Actions;
+namespace App\Application\User\Auth;
 
 use App\Domain\User\Auth\Services\TokenServiceInterface;
 use App\Models\User;
 
-class LogoutAllUserAction
+final readonly class LogoutUser
 {
     public function __construct(
-        private readonly TokenServiceInterface $tokenService
-    ) {
-    }
+        private TokenServiceInterface $tokenService,
+    ) {}
 
     public function run(User $user): void
     {
-        $this->tokenService->deleteAllTokens($user);
+        $this->tokenService->deleteCurrentToken($user);
     }
 }

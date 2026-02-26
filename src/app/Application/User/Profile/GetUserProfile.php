@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\User\Profile\Actions;
+namespace App\Application\User\Profile;
 
 use App\Models\User;
 
-class GetUserProfileAction
+final readonly class GetUserProfile
 {
     public function run(User $user): User
     {

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Application\User\Auth\CreateNewUser;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,12 +13,12 @@ class CreateNewUserActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private CreateNewUserAction $action;
+    private CreateNewUser $action;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(CreateNewUserAction::class);
+        $this->action = app(CreateNewUser::class);
     }
 
     public function test_it_creates_user_successfully(): void

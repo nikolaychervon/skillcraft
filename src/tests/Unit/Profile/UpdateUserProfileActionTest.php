@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Profile;
 
-use App\Domain\User\Profile\Actions\UpdateUserProfileAction;
+use App\Application\User\Profile\UpdateUserProfile;
 use App\Domain\User\Profile\RequestData\UpdateUserProfileRequestData;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
@@ -17,7 +17,7 @@ class UpdateUserProfileActionTest extends TestCase
     public function test_it_updates_all_profile_fields(): void
     {
         $repo = Mockery::mock(UserRepositoryInterface::class);
-        $action = new UpdateUserProfileAction($repo);
+        $action = new UpdateUserProfile($repo);
 
         $user = new User();
         $requestData = new UpdateUserProfileRequestData(

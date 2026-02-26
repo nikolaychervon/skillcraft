@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Кэш каталога в Redis. Ключи и TTL — здесь.
- * В хранилище пишется JSON
+ * В хранилище пишется JSON.
  */
 final class CatalogCache implements CatalogCacheInterface
 {

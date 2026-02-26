@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\LogoutAllUserAction;
+use App\Application\User\Auth\LogoutAllUser;
 use App\Domain\User\Auth\Services\TokenServiceInterface;
 use App\Models\User;
 use Mockery;
@@ -16,7 +16,7 @@ class LogoutAllUserActionTest extends TestCase
     public function test_it_deletes_all_tokens(): void
     {
         $tokenService = Mockery::mock(TokenServiceInterface::class);
-        $action = new LogoutAllUserAction($tokenService);
+        $action = new LogoutAllUser($tokenService);
 
         $user = new User();
 

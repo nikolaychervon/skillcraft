@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Profile;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Application\User\Auth\CreateNewUser;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,7 +26,7 @@ class ProfileControllerTest extends TestCase
     {
         parent::setUp();
 
-        $createUserAction = app(CreateNewUserAction::class);
+        $createUserAction = app(CreateNewUser::class);
         $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',

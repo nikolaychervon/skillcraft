@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\RegisterUserAction;
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\RegisterUser;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
+use App\Domain\User\Auth\Services\HashServiceInterface;
 use App\Domain\User\Auth\Services\NotificationServiceInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
@@ -24,11 +27,11 @@ class RegisterUserActionTest extends TestCase
             email: 'ivan@example.com',
             uniqueNickname: 'ivan_petrov',
             password: 'Password123!',
-            middleName: null
+            middleName: null,
         );
 
         $repo = Mockery::mock(UserRepositoryInterface::class);
-        $createNewUserAction = Mockery::mock(CreateNewUserAction::class);
+        $hashService = app(HashServiceInterface::class);
         $notificationService = Mockery::mock(NotificationServiceInterface::class);
 
         $user = new User();
@@ -40,9 +43,9 @@ class RegisterUserActionTest extends TestCase
             ->with($requestData->email)
             ->andReturn(null);
 
-        $createNewUserAction->shouldReceive('run')
+        $repo->shouldReceive('create')
             ->once()
-            ->with($requestData)
+            ->with(Mockery::on(fn (array $data): bool => $data['email'] === $requestData->email))
             ->andReturn($user);
 
         $notificationService->shouldReceive('sendEmailVerificationNotification')
@@ -50,11 +53,8 @@ class RegisterUserActionTest extends TestCase
             ->with($user)
             ->andReturnNull();
 
-        $action = new RegisterUserAction(
-            userRepository: $repo,
-            createNewUserAction: $createNewUserAction,
-            notificationService: $notificationService
-        );
+        $createNewUser = new CreateNewUser($repo, $hashService);
+        $action = new RegisterUser($repo, $createNewUser, $notificationService);
 
         $result = $action->run($requestData);
 
@@ -69,11 +69,11 @@ class RegisterUserActionTest extends TestCase
             email: 'ivan@example.com',
             uniqueNickname: 'ivan_petrov',
             password: 'Password123!',
-            middleName: null
+            middleName: null,
         );
 
         $repo = Mockery::mock(UserRepositoryInterface::class);
-        $createNewUserAction = Mockery::mock(CreateNewUserAction::class);
+        $hashService = app(HashServiceInterface::class);
         $notificationService = Mockery::mock(NotificationServiceInterface::class);
 
         $existingUser = new User();
@@ -85,18 +85,15 @@ class RegisterUserActionTest extends TestCase
             ->with($requestData->email)
             ->andReturn($existingUser);
 
-        $createNewUserAction->shouldNotReceive('run');
+        $repo->shouldNotReceive('create');
 
         $notificationService->shouldReceive('sendEmailVerificationNotification')
             ->once()
             ->with($existingUser)
             ->andReturnNull();
 
-        $action = new RegisterUserAction(
-            userRepository: $repo,
-            createNewUserAction: $createNewUserAction,
-            notificationService: $notificationService
-        );
+        $createNewUser = new CreateNewUser($repo, $hashService);
+        $action = new RegisterUser($repo, $createNewUser, $notificationService);
 
         $result = $action->run($requestData);
 

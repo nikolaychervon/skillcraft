@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Profile;
 
-use App\Domain\User\Profile\Actions\ChangeUserEmailAction;
-use App\Domain\User\Profile\Actions\ChangeUserPasswordAction;
-use App\Domain\User\Profile\Actions\GetUserProfileAction;
-use App\Domain\User\Profile\Actions\UpdateUserProfileAction;
+use App\Application\User\Profile\ChangeUserEmail;
+use App\Application\User\Profile\ChangeUserPassword;
+use App\Application\User\Profile\GetUserProfile;
+use App\Application\User\Profile\UpdateUserProfile;
 use App\Domain\User\Profile\RequestData\ChangeUserEmailRequestData;
 use App\Domain\User\Profile\RequestData\ChangeUserPasswordRequestData;
 use App\Domain\User\Profile\RequestData\UpdateUserProfileRequestData;
@@ -22,32 +22,32 @@ use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-    public function show(Request $request, GetUserProfileAction $action): JsonResponse
+    public function show(Request $request, GetUserProfile $getUserProfile): JsonResponse
     {
-        $user = $action->run($request->user());
+        $user = $getUserProfile->run($request->user());
         return ApiResponse::success(data: UserProfileResource::make($user));
     }
 
-    public function update(UpdateProfileRequest $request, UpdateUserProfileAction $action): JsonResponse
+    public function update(UpdateProfileRequest $request, UpdateUserProfile $updateUserProfile): JsonResponse
     {
         $data = UpdateUserProfileRequestData::fromArray($request->validated());
-        $user = $action->run($request->user(), $data);
+        $user = $updateUserProfile->run($request->user(), $data);
 
         return ApiResponse::success(__('messages.profile-updated'), UserProfileResource::make($user));
     }
 
-    public function changeEmail(ChangeEmailRequest $request, ChangeUserEmailAction $action): JsonResponse
+    public function changeEmail(ChangeEmailRequest $request, ChangeUserEmail $changeUserEmail): JsonResponse
     {
         $data = ChangeUserEmailRequestData::fromArray($request->validated());
-        $action->run($request->user(), $data);
+        $changeUserEmail->run($request->user(), $data);
 
         return ApiResponse::success(__('messages.email-verify'), ['email' => $data->email]);
     }
 
-    public function changePassword(ChangePasswordRequest $request, ChangeUserPasswordAction $action): JsonResponse
+    public function changePassword(ChangePasswordRequest $request, ChangeUserPassword $changeUserPassword): JsonResponse
     {
         $data = ChangeUserPasswordRequestData::fromArray($request->validated());
-        $action->run($request->user(), $data);
+        $changeUserPassword->run($request->user(), $data);
 
         return ApiResponse::success(__('messages.password-changed'));
     }

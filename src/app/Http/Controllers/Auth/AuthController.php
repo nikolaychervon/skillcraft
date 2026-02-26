@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Domain\User\Auth\Actions\LoginUserAction;
-use App\Domain\User\Auth\Actions\LogoutAllUserAction;
-use App\Domain\User\Auth\Actions\LogoutUserAction;
-use App\Domain\User\Auth\Actions\RegisterUserAction;
+use App\Application\User\Auth\LoginUser;
+use App\Application\User\Auth\LogoutAllUser;
+use App\Application\User\Auth\LogoutUser;
+use App\Application\User\Auth\RegisterUser;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\RequestData\LoginUserRequestData;
 use App\Http\Controllers\Controller;
@@ -20,18 +20,18 @@ use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request, LoginUserAction $loginUserAction): JsonResponse
+    public function login(LoginRequest $request, LoginUser $loginUser): JsonResponse
     {
         $data = LoginUserRequestData::fromArray($request->validated());
-        $token = $loginUserAction->run($data);
+        $token = $loginUser->run($data);
 
         return ApiResponse::success(__('auth.login'), ['token' => $token]);
     }
 
-    public function register(RegisterRequest $request, RegisterUserAction $registerUserAction): JsonResponse
+    public function register(RegisterRequest $request, RegisterUser $registerUser): JsonResponse
     {
         $data = CreatingUserRequestData::fromArray($request->validated());
-        $user = $registerUserAction->run($data);
+        $user = $registerUser->run($data);
 
         return ApiResponse::success(__('messages.email-verify'), [
             'user_id' => $user->id,
@@ -39,15 +39,15 @@ class AuthController extends Controller
         ], HttpCode::Created);
     }
 
-    public function logout(Request $request, LogoutUserAction $logoutUserAction): JsonResponse
+    public function logout(Request $request, LogoutUser $logoutUser): JsonResponse
     {
-        $logoutUserAction->run($request->user());
+        $logoutUser->run($request->user());
         return ApiResponse::success(__('auth.logout'));
     }
 
-    public function logoutAll(Request $request, LogoutAllUserAction $logoutAllUserAction): JsonResponse
+    public function logoutAll(Request $request, LogoutAllUser $logoutAllUser): JsonResponse
     {
-        $logoutAllUserAction->run($request->user());
+        $logoutAllUser->run($request->user());
         return ApiResponse::success(__('auth.logout-all'));
     }
 }

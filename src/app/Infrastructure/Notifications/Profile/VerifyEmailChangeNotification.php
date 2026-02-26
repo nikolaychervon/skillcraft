@@ -14,7 +14,7 @@ class VerifyEmailChangeNotification extends EmailNotification
     public function __construct(
         private readonly int $userId,
         private readonly string $name,
-        private readonly string $pendingEmail
+        private readonly string $pendingEmail,
     ) {
     }
 

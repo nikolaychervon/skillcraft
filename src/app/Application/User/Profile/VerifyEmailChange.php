@@ -2,24 +2,23 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\User\Profile\Actions;
+namespace App\Application\User\Profile;
 
 use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
 
-class VerifyEmailChangeAction
+/**
+ * Подтверждение смены email по подписанной ссылке: переносит pending_email в email и сбрасывает pending.
+ */
+final readonly class VerifyEmailChange
 {
     public function __construct(
-        private readonly UserRepositoryInterface $userRepository
-    ) {
-    }
+        private UserRepositoryInterface $userRepository,
+    ) {}
 
-    /**
-     * @throws InvalidConfirmationLinkException
-     * @throws UserNotFoundException
-     */
+    /** @throws InvalidConfirmationLinkException|UserNotFoundException */
     public function run(int $id, string $hash): void
     {
         $user = $this->userRepository->findById($id);
@@ -27,7 +26,7 @@ class VerifyEmailChangeAction
             throw new UserNotFoundException(['id' => $id]);
         }
 
-        if (!$user->pending_email) {
+        if ($user->pending_email === null) {
             throw new InvalidConfirmationLinkException();
         }
 

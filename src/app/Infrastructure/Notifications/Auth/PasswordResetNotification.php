@@ -12,7 +12,7 @@ class PasswordResetNotification extends EmailNotification
 {
     public function __construct(
         private readonly string $email,
-        private readonly string $resetToken
+        private readonly string $resetToken,
     ) {
     }
 

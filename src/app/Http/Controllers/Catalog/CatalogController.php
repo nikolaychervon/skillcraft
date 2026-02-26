@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Domain\Catalog\Actions\GetSpecializationLanguagesAction;
-use App\Domain\Catalog\Actions\GetSpecializationsAction;
+use App\Application\Catalog\GetSpecializationLanguages;
+use App\Application\Catalog\GetSpecializations;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Catalog\ProgrammingLanguageResource;
 use App\Http\Resources\Catalog\SpecializationResource;
@@ -14,15 +14,15 @@ use Illuminate\Http\JsonResponse;
 
 class CatalogController extends Controller
 {
-    public function specializations(GetSpecializationsAction $getSpecializationsAction): JsonResponse
+    public function specializations(GetSpecializations $getSpecializations): JsonResponse
     {
-        $collection = $getSpecializationsAction->run();
+        $collection = $getSpecializations->run();
         return ApiResponse::success(data: SpecializationResource::collection($collection));
     }
 
-    public function specializationLanguages(int $id, GetSpecializationLanguagesAction $getSpecializationLanguagesAction): JsonResponse
+    public function specializationLanguages(int $id, GetSpecializationLanguages $getSpecializationLanguages): JsonResponse
     {
-        $collection = $getSpecializationLanguagesAction->run($id);
+        $collection = $getSpecializationLanguages->run($id);
         return ApiResponse::success(data: ProgrammingLanguageResource::collection($collection));
     }
 }

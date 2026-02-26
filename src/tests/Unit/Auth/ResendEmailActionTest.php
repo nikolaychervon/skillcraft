@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\Email\ResendEmailAction;
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\ResendVerificationEmail;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\RequestData\ResendEmailRequestData;
 use App\Infrastructure\Notifications\Auth\VerifyEmailForRegisterNotification;
@@ -18,16 +18,16 @@ class ResendEmailActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private ResendEmailAction $action;
-    private CreateNewUserAction $createUserAction;
+    private ResendVerificationEmail $action;
+    private CreateNewUser $createUserAction;
     private User $user;
     private string $email = 'test@example.com';
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(ResendEmailAction::class);
-        $this->createUserAction = app(CreateNewUserAction::class);
+        $this->action = app(ResendVerificationEmail::class);
+        $this->createUserAction = app(CreateNewUser::class);
 
         Notification::fake();
 

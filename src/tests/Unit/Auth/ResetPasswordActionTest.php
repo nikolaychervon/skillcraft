@@ -3,9 +3,9 @@
 namespace Tests\Unit\Auth;
 
 use App\Domain\User\Exceptions\UserNotFoundException;
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\Password\ResetPasswordAction;
-use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\ResetPassword;
+use App\Application\User\Auth\SendPasswordResetLink;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\RequestData\ResetPasswordRequestData;
@@ -25,8 +25,8 @@ class ResetPasswordActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private ResetPasswordAction $action;
-    private SendPasswordResetLinkAction $sendResetLinkAction;
+    private ResetPassword $action;
+    private SendPasswordResetLink $sendResetLinkAction;
     private PasswordResetTokensCacheInterface $cache;
     private User $user;
     private string $email = 'test@example.com';
@@ -35,11 +35,11 @@ class ResetPasswordActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(ResetPasswordAction::class);
-        $this->sendResetLinkAction = app(SendPasswordResetLinkAction::class);
+        $this->action = app(ResetPassword::class);
+        $this->sendResetLinkAction = app(SendPasswordResetLink::class);
         $this->cache = app(PasswordResetTokensCacheInterface::class);
 
-        $createUserAction = app(CreateNewUserAction::class);
+        $createUserAction = app(CreateNewUser::class);
         $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
@@ -161,7 +161,7 @@ class ResetPasswordActionTest extends TestCase
 
         $this->app->instance(UserRepositoryInterface::class, $mock);
 
-        $action = $this->app->make(ResetPasswordAction::class);
+        $action = $this->app->make(ResetPassword::class);
 
         $this->expectException(PasswordResetFailedException::class);
         $action->run($requestData);
@@ -190,7 +190,7 @@ class ResetPasswordActionTest extends TestCase
             ->method('transaction')
             ->willReturnCallback(static fn (callable $callback) => $callback());
 
-        $action = new ResetPasswordAction(
+        $action = new ResetPassword(
             userRepository: $repo,
             passwordResetTokensCache: $this->cache,
             hashService: $hashService,

@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Catalog\Specializations;
 
-use App\Domain\Catalog\Actions\GetSpecializationLanguagesAction;
+use App\Application\Catalog\GetSpecializationLanguages;
 use App\Domain\Catalog\Repositories\ProgrammingLanguageRepositoryInterface;
 use App\Models\ProgrammingLanguage;
 use Illuminate\Support\Collection;
@@ -28,7 +28,7 @@ class GetSpecializationLanguagesActionTest extends TestCase
             ->with($specializationId)
             ->andReturn($languages);
 
-        $action = new GetSpecializationLanguagesAction($repo);
+        $action = new GetSpecializationLanguages($repo);
 
         $result = $action->run($specializationId);
 
@@ -45,7 +45,7 @@ class GetSpecializationLanguagesActionTest extends TestCase
             ->with(99)
             ->andReturn(collect());
 
-        $action = new GetSpecializationLanguagesAction($repo);
+        $action = new GetSpecializationLanguages($repo);
 
         $result = $action->run(99);
 

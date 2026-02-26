@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Domain\User\Auth\Actions\Email\ResendEmailAction;
-use App\Domain\User\Auth\Actions\Email\VerifyEmailAction;
+use App\Application\User\Auth\ResendVerificationEmail;
+use App\Application\User\Auth\VerifyEmail;
 use App\Domain\User\Auth\RequestData\ResendEmailRequestData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResendEmailRequest;
@@ -14,17 +14,17 @@ use Illuminate\Http\JsonResponse;
 
 class EmailVerificationController extends Controller
 {
-    public function verify(int $id, string $hash, VerifyEmailAction $verifyEmailAction): JsonResponse
+    public function verify(int $id, string $hash, VerifyEmail $verifyEmail): JsonResponse
     {
-        $token = $verifyEmailAction->run($id, $hash);
+        $token = $verifyEmail->run($id, $hash);
 
         return ApiResponse::success(__('messages.email-confirmed'), ['token' => $token]);
     }
 
-    public function resend(ResendEmailRequest $request, ResendEmailAction $resendEmailAction): JsonResponse
+    public function resend(ResendEmailRequest $request, ResendVerificationEmail $resendVerificationEmail): JsonResponse
     {
         $data = ResendEmailRequestData::fromArray($request->validated());
-        $resendEmailAction->run($data);
+        $resendVerificationEmail->run($data);
 
         return ApiResponse::success(__('messages.email-resend'));
     }

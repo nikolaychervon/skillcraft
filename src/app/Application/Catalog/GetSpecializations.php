@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Catalog\Actions;
+namespace App\Application\Catalog;
 
 use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
 use App\Models\Specialization;
 use Illuminate\Support\Collection;
 
-class GetSpecializationsAction
+final readonly class GetSpecializations
 {
     public function __construct(
-        private readonly SpecializationRepositoryInterface $specializationRepository
-    ) {
-    }
+        private SpecializationRepositoryInterface $specializationRepository,
+    ) {}
 
     /** @return Collection<int, Specialization> */
     public function run(): Collection

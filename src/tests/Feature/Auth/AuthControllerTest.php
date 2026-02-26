@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
+use App\Application\User\Auth\CreateNewUser;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Models\User;
@@ -144,7 +144,7 @@ class AuthControllerTest extends TestCase
 
     public function test_it_logins_user_successfully(): void
     {
-        $createUserAction = app(CreateNewUserAction::class);
+        $createUserAction = app(CreateNewUser::class);
         $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',

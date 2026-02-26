@@ -14,7 +14,7 @@ interface UserRepositoryInterface
     /** Поиск пользователя по email. */
     public function findByEmail(string $email): ?User;
 
-    /** Создание пользователя по RequestData и хешу пароля. */
+    /** Создание пользователя. $userData должен содержать уже хешированный пароль (ключ password). */
     public function create(array $userData): User;
 
     /**

@@ -2,18 +2,17 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Catalog\Actions;
+namespace App\Application\Catalog;
 
 use App\Domain\Catalog\Repositories\ProgrammingLanguageRepositoryInterface;
 use App\Models\ProgrammingLanguage;
 use Illuminate\Support\Collection;
 
-class GetSpecializationLanguagesAction
+final readonly class GetSpecializationLanguages
 {
     public function __construct(
-        private readonly ProgrammingLanguageRepositoryInterface $programmingLanguageRepository
-    ) {
-    }
+        private ProgrammingLanguageRepositoryInterface $programmingLanguageRepository,
+    ) {}
 
     /** @return Collection<int, ProgrammingLanguage> */
     public function run(int $specializationId): Collection

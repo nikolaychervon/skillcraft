@@ -5,8 +5,8 @@ namespace Tests\Unit\Auth;
 use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
 use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
 use App\Domain\User\Exceptions\UserNotFoundException;
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\Email\VerifyEmailAction;
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\VerifyEmail;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,8 +17,8 @@ class VerifyEmailActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private VerifyEmailAction $action;
-    private CreateNewUserAction $createUserAction;
+    private VerifyEmail $action;
+    private CreateNewUser $createUserAction;
     private User $user;
     private string $email = 'test@example.com';
     private string $hash;
@@ -26,8 +26,8 @@ class VerifyEmailActionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(VerifyEmailAction::class);
-        $this->createUserAction = app(CreateNewUserAction::class);
+        $this->action = app(VerifyEmail::class);
+        $this->createUserAction = app(CreateNewUser::class);
 
         $requestData = new CreatingUserRequestData(
             firstName: 'Иван',

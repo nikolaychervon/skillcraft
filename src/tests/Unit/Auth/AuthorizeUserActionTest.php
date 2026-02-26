@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\LoginUserAction;
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\LoginUser;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\RequestData\LoginUserRequestData;
@@ -17,16 +17,16 @@ class AuthorizeUserActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private LoginUserAction $action;
-    private CreateNewUserAction $createUserAction;
+    private LoginUser $action;
+    private CreateNewUser $createUserAction;
     private User $user;
     private string $password = 'Password123!';
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(LoginUserAction::class);
-        $this->createUserAction = app(CreateNewUserAction::class);
+        $this->action = app(LoginUser::class);
+        $this->createUserAction = app(CreateNewUser::class);
 
         $requestData = new CreatingUserRequestData(
             firstName: 'Иван',

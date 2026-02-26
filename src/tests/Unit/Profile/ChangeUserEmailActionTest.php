@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Profile;
 
-use App\Domain\User\Profile\Actions\ChangeUserEmailAction;
+use App\Application\User\Profile\ChangeUserEmail;
 use App\Domain\User\Profile\RequestData\ChangeUserEmailRequestData;
 use App\Domain\User\Profile\Services\ProfileNotificationServiceInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
@@ -20,7 +20,7 @@ class ChangeUserEmailActionTest extends TestCase
         $repo = Mockery::mock(UserRepositoryInterface::class);
         $notificationService = Mockery::mock(ProfileNotificationServiceInterface::class);
 
-        $action = new ChangeUserEmailAction($repo, $notificationService);
+        $action = new ChangeUserEmail($repo, $notificationService);
 
         $user = new User();
         $requestData = new ChangeUserEmailRequestData('new@example.com');

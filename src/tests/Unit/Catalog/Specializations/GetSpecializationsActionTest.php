@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Catalog\Specializations;
 
-use App\Domain\Catalog\Actions\GetSpecializationsAction;
+use App\Application\Catalog\GetSpecializations;
 use App\Domain\Catalog\Repositories\SpecializationRepositoryInterface;
 use App\Models\Specialization;
 use Illuminate\Support\Collection;
@@ -27,7 +27,7 @@ class GetSpecializationsActionTest extends TestCase
             ->withNoArgs()
             ->andReturn($specializations);
 
-        $action = new GetSpecializationsAction($repo);
+        $action = new GetSpecializations($repo);
 
         $result = $action->run();
 
@@ -43,7 +43,7 @@ class GetSpecializationsActionTest extends TestCase
             ->once()
             ->andReturn(collect());
 
-        $action = new GetSpecializationsAction($repo);
+        $action = new GetSpecializations($repo);
 
         $result = $action->run();
 

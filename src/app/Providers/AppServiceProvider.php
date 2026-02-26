@@ -25,20 +25,20 @@ use Illuminate\Support\ServiceProvider;
 class AppServiceProvider extends ServiceProvider
 {
     public $bindings = [
-        // User aggregate repository
+        // Репозиторий пользователей
         UserRepositoryInterface::class => UserRepository::class,
 
-        // Cache
+        // Кэш
         PasswordResetTokensCacheInterface::class => PasswordResetTokensCache::class,
 
-        // Auth services
+        // Сервисы аутентификации
         HashServiceInterface::class => HashService::class,
         TokenServiceInterface::class => TokenService::class,
         NotificationServiceInterface::class => NotificationService::class,
         TokenGeneratorInterface::class => TokenGenerator::class,
         TransactionServiceInterface::class => TransactionService::class,
 
-        // Profile services
+        // Сервисы профиля
         ProfileNotificationServiceInterface::class => ProfileNotificationService::class,
     ];
 }

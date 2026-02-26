@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 abstract readonly class BaseRequestData
 {
     /**
-     * Build DTO from array (supports snake_case keys).
+     * Собирает DTO из массива (поддержка ключей в snake_case).
      *
      * @param array<string, mixed> $data
      * @return static
