@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\User\Profile\Actions;
 
-use App\Domain\User\Profile\DTO\ChangeUserEmailDTO;
+use App\Domain\User\Profile\RequestData\ChangeUserEmailRequestData;
 use App\Domain\User\Profile\Services\ProfileNotificationServiceInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
@@ -17,9 +17,9 @@ class ChangeUserEmailAction
     ) {
     }
 
-    public function run(User $user, ChangeUserEmailDTO $dto): void
+    public function run(User $user, ChangeUserEmailRequestData $requestData): void
     {
-        $this->userRepository->setPendingEmail($user, $dto->getEmail());
-        $this->notificationService->sendEmailChangeVerificationNotification($user, $dto->getEmail());
+        $this->userRepository->setPendingEmail($user, $requestData->getEmail());
+        $this->notificationService->sendEmailChangeVerificationNotification($user, $requestData->getEmail());
     }
 }

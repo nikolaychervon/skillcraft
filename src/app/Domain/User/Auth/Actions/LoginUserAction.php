@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\User\Auth\Actions;
 
 use App\Domain\User\Auth\Constants\AuthConstants;
-use App\Domain\User\Auth\DTO\LoginUserDTO;
+use App\Domain\User\Auth\RequestData\LoginUserRequestData;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Domain\User\Auth\Services\HashServiceInterface;
@@ -25,15 +25,15 @@ class LoginUserAction
     /**
      * @throws IncorrectLoginDataException
      */
-    public function run(LoginUserDTO $userDTO): string
+    public function run(LoginUserRequestData $userRequestData): string
     {
-        $user = $this->userRepository->findByEmail($userDTO->getEmail());
+        $user = $this->userRepository->findByEmail($userRequestData->getEmail());
 
         if ($this->userNotConfirmedSpecification->isSatisfiedBy($user)) {
             throw new IncorrectLoginDataException();
         }
 
-        if (!$this->hashService->check($userDTO->getPassword(), $user->password)) {
+        if (!$this->hashService->check($userRequestData->getPassword(), $user->password)) {
             throw new IncorrectLoginDataException();
         }
 

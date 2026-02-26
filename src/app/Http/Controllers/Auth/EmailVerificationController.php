@@ -7,7 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
 use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
 use App\Domain\User\Exceptions\UserNotFoundException;
-use App\Application\User\Auth\Assemblers\ResendEmailDTOAssembler;
+use App\Application\User\Auth\Assemblers\ResendEmailRequestDataAssembler;
 use App\Domain\User\Auth\Actions\Email\ResendEmailAction;
 use App\Domain\User\Auth\Actions\Email\VerifyEmailAction;
 use App\Http\Controllers\Controller;
@@ -17,7 +17,7 @@ use Illuminate\Http\JsonResponse;
 
 class EmailVerificationController extends Controller
 {
-    public function __construct(private readonly ResendEmailDTOAssembler $resendEmailDTOAssembler)
+    public function __construct(private readonly ResendEmailRequestDataAssembler $resendEmailRequestDataAssembler)
     {
     }
 
@@ -50,8 +50,8 @@ class EmailVerificationController extends Controller
      */
     public function resend(ResendEmailRequest $request, ResendEmailAction $resendEmailAction): JsonResponse
     {
-        $resendEmailDTO = $this->resendEmailDTOAssembler->assemble($request->validated());
-        $resendEmailAction->run($resendEmailDTO);
+        $resendEmailRequestData = $this->resendEmailRequestDataAssembler->assemble($request->validated());
+        $resendEmailAction->run($resendEmailRequestData);
 
         return ApiResponse::success(__('messages.email-resend'));
     }

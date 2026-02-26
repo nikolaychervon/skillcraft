@@ -4,7 +4,7 @@ namespace Tests\Unit\Profile;
 
 use App\Domain\User\Auth\Services\HashServiceInterface;
 use App\Domain\User\Profile\Actions\ChangeUserPasswordAction;
-use App\Domain\User\Profile\DTO\ChangeUserPasswordDTO;
+use App\Domain\User\Profile\RequestData\ChangeUserPasswordRequestData;
 use App\Domain\User\Profile\Exceptions\IncorrectCurrentPasswordException;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
@@ -25,13 +25,13 @@ class ChangeUserPasswordActionTest extends TestCase
         $user = new User();
         $user->password = 'hashed';
 
-        $dto = new ChangeUserPasswordDTO('wrong', 'new');
+        $requestData = new ChangeUserPasswordRequestData('wrong', 'new');
 
         $hash->shouldReceive('check')->once()->with('wrong', 'hashed')->andReturnFalse();
         $repo->shouldNotReceive('updatePassword');
 
         $this->expectException(IncorrectCurrentPasswordException::class);
-        $action->run($user, $dto);
+        $action->run($user, $requestData);
     }
 
     public function test_it_updates_password_when_old_password_correct(): void
@@ -43,13 +43,13 @@ class ChangeUserPasswordActionTest extends TestCase
         $user = new User();
         $user->password = 'hashed';
 
-        $dto = new ChangeUserPasswordDTO('old', 'new');
+        $requestData = new ChangeUserPasswordRequestData('old', 'new');
 
         $hash->shouldReceive('check')->once()->with('old', 'hashed')->andReturnTrue();
         $hash->shouldReceive('make')->once()->with('new')->andReturn('new_hashed');
 
         $repo->shouldReceive('updatePassword')->once()->with($user, 'new_hashed')->andReturnNull();
 
-        $action->run($user, $dto);
+        $action->run($user, $requestData);
     }
 }

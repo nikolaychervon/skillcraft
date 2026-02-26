@@ -4,7 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -27,7 +27,7 @@ class EmailVerificationControllerTest extends TestCase
         parent::setUp();
 
         $createUserAction = app(CreateNewUserAction::class);
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: $this->email,
@@ -36,7 +36,7 @@ class EmailVerificationControllerTest extends TestCase
             middleName: null
         );
 
-        $this->user = $createUserAction->run($dto);
+        $this->user = $createUserAction->run($requestData);
 
         $this->verificationUrl = URL::temporarySignedRoute(
             'verification.verify',

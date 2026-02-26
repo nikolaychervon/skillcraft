@@ -3,7 +3,7 @@
 namespace Tests\Unit\Profile;
 
 use App\Domain\User\Profile\Actions\UpdateUserProfileAction;
-use App\Domain\User\Profile\DTO\UpdateUserProfileDTO;
+use App\Domain\User\Profile\RequestData\UpdateUserProfileRequestData;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Mockery;
@@ -20,7 +20,7 @@ class UpdateUserProfileActionTest extends TestCase
         $action = new UpdateUserProfileAction($repo);
 
         $user = new User();
-        $dto = new UpdateUserProfileDTO(
+        $requestData = new UpdateUserProfileRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             middleName: null,
@@ -37,7 +37,7 @@ class UpdateUserProfileActionTest extends TestCase
             ])
             ->andReturn($user);
 
-        $result = $action->run($user, $dto);
+        $result = $action->run($user, $requestData);
         $this->assertSame($user, $result);
     }
 }

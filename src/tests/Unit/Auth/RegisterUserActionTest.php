@@ -4,7 +4,7 @@ namespace Tests\Unit\Auth;
 
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
 use App\Domain\User\Auth\Actions\RegisterUserAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\Services\NotificationServiceInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
@@ -18,7 +18,7 @@ class RegisterUserActionTest extends TestCase
 
     public function test_it_creates_user_when_not_exists_and_sends_verification_email(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'ivan@example.com',
@@ -33,16 +33,16 @@ class RegisterUserActionTest extends TestCase
 
         $user = new User();
         $user->id = 123;
-        $user->email = $dto->getEmail();
+        $user->email = $requestData->getEmail();
 
         $repo->shouldReceive('findByEmail')
             ->once()
-            ->with($dto->getEmail())
+            ->with($requestData->getEmail())
             ->andReturn(null);
 
         $createNewUserAction->shouldReceive('run')
             ->once()
-            ->with($dto)
+            ->with($requestData)
             ->andReturn($user);
 
         $notificationService->shouldReceive('sendEmailVerificationNotification')
@@ -56,14 +56,14 @@ class RegisterUserActionTest extends TestCase
             notificationService: $notificationService
         );
 
-        $result = $action->run($dto);
+        $result = $action->run($requestData);
 
         $this->assertSame($user, $result);
     }
 
     public function test_it_does_not_create_user_when_exists_but_still_sends_verification_email(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'ivan@example.com',
@@ -78,11 +78,11 @@ class RegisterUserActionTest extends TestCase
 
         $existingUser = new User();
         $existingUser->id = 456;
-        $existingUser->email = $dto->getEmail();
+        $existingUser->email = $requestData->getEmail();
 
         $repo->shouldReceive('findByEmail')
             ->once()
-            ->with($dto->getEmail())
+            ->with($requestData->getEmail())
             ->andReturn($existingUser);
 
         $createNewUserAction->shouldNotReceive('run');
@@ -98,7 +98,7 @@ class RegisterUserActionTest extends TestCase
             notificationService: $notificationService
         );
 
-        $result = $action->run($dto);
+        $result = $action->run($requestData);
 
         $this->assertSame($existingUser, $result);
     }

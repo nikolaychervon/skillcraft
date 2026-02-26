@@ -3,7 +3,7 @@
 namespace Tests\Feature\Profile;
 
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -27,7 +27,7 @@ class ProfileControllerTest extends TestCase
         parent::setUp();
 
         $createUserAction = app(CreateNewUserAction::class);
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'profile@example.com',
@@ -35,7 +35,7 @@ class ProfileControllerTest extends TestCase
             password: $this->password,
             middleName: null
         );
-        $this->user = $createUserAction->run($dto);
+        $this->user = $createUserAction->run($requestData);
         $this->user->markEmailAsVerified();
     }
 

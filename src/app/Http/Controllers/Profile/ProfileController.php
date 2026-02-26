@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Profile;
 
-use App\Application\User\Profile\Assemblers\ChangeUserEmailDTOAssembler;
-use App\Application\User\Profile\Assemblers\ChangeUserPasswordDTOAssembler;
-use App\Application\User\Profile\Assemblers\UpdateUserProfileDTOAssembler;
+use App\Application\User\Profile\Assemblers\ChangeUserEmailRequestDataAssembler;
+use App\Application\User\Profile\Assemblers\ChangeUserPasswordRequestDataAssembler;
+use App\Application\User\Profile\Assemblers\UpdateUserProfileRequestDataAssembler;
 use App\Domain\User\Profile\Actions\ChangeUserEmailAction;
 use App\Domain\User\Profile\Actions\ChangeUserPasswordAction;
 use App\Domain\User\Profile\Actions\GetUserProfileAction;
@@ -24,9 +24,9 @@ use Illuminate\Http\Request;
 class ProfileController extends Controller
 {
     public function __construct(
-        private readonly UpdateUserProfileDTOAssembler $updateUserProfileDTOAssembler,
-        private readonly ChangeUserEmailDTOAssembler $changeUserEmailDTOAssembler,
-        private readonly ChangeUserPasswordDTOAssembler $changeUserPasswordDTOAssembler,
+        private readonly UpdateUserProfileRequestDataAssembler $updateUserProfileRequestDataAssembler,
+        private readonly ChangeUserEmailRequestDataAssembler $changeUserEmailRequestDataAssembler,
+        private readonly ChangeUserPasswordRequestDataAssembler $changeUserPasswordRequestDataAssembler,
     ) {
     }
 
@@ -38,8 +38,8 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request, UpdateUserProfileAction $action): JsonResponse
     {
-        $dto = $this->updateUserProfileDTOAssembler->assemble($request->validated());
-        $user = $action->run($request->user(), $dto);
+        $requestData = $this->updateUserProfileRequestDataAssembler->assemble($request->validated());
+        $user = $action->run($request->user(), $requestData);
 
         return ApiResponse::success(
             message: __('messages.profile-updated'),
@@ -50,12 +50,12 @@ class ProfileController extends Controller
     public function changeEmail(ChangeEmailRequest $request, ChangeUserEmailAction $action): JsonResponse
     {
         $user = $request->user();
-        $dto = $this->changeUserEmailDTOAssembler->assemble($request->validated());
-        $action->run($user, $dto);
+        $requestData = $this->changeUserEmailRequestDataAssembler->assemble($request->validated());
+        $action->run($user, $requestData);
 
         return ApiResponse::success(
             message: __('messages.email-verify'),
-            data: ['email' => $dto->getEmail()],
+            data: ['email' => $requestData->getEmail()],
         );
     }
 
@@ -64,8 +64,8 @@ class ProfileController extends Controller
      */
     public function changePassword(ChangePasswordRequest $request, ChangeUserPasswordAction $action): JsonResponse
     {
-        $dto = $this->changeUserPasswordDTOAssembler->assemble($request->validated());
-        $action->run($request->user(), $dto);
+        $requestData = $this->changeUserPasswordRequestDataAssembler->assemble($request->validated());
+        $action->run($request->user(), $requestData);
 
         return ApiResponse::success(message: __('messages.password-changed'));
     }

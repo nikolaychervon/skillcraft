@@ -3,7 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -145,7 +145,7 @@ class AuthControllerTest extends TestCase
     public function test_it_logins_user_successfully(): void
     {
         $createUserAction = app(CreateNewUserAction::class);
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: $this->email,
@@ -154,7 +154,7 @@ class AuthControllerTest extends TestCase
             middleName: null
         );
 
-        $user = $createUserAction->run($dto);
+        $user = $createUserAction->run($requestData);
         $user->markEmailAsVerified();
 
         $response = $this->postJson(self::LOGIN_API, [

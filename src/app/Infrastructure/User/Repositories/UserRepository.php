@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\User\Repositories;
 
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
 
@@ -22,16 +21,9 @@ class UserRepository implements UserRepositoryInterface
         return self::MODEL::query()->where('email', $email)->first();
     }
 
-    public function create(CreatingUserDTO $dto, string $hashedPassword): User
+    public function create(array $userData): User
     {
-        return self::MODEL::query()->create([
-            'first_name' => $dto->getFirstName(),
-            'last_name' => $dto->getLastName(),
-            'middle_name' => $dto->getMiddleName(),
-            'email' => $dto->getEmail(),
-            'password' => $hashedPassword,
-            'unique_nickname' => $dto->getUniqueNickname(),
-        ]);
+        return self::MODEL::query()->create($userData);
     }
 
     /**

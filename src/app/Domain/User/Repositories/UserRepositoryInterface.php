@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Domain\User\Repositories;
 
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
 use App\Models\User;
 
 interface UserRepositoryInterface
@@ -15,8 +14,8 @@ interface UserRepositoryInterface
     /** Поиск пользователя по email. */
     public function findByEmail(string $email): ?User;
 
-    /** Создание пользователя по DTO и хешу пароля. */
-    public function create(CreatingUserDTO $dto, string $hashedPassword): User;
+    /** Создание пользователя по RequestData и хешу пароля. */
+    public function create(array $userData): User;
 
     /**
      * Обновление атрибутов пользователя.

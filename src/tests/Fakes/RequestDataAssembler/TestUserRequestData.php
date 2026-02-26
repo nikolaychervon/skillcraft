@@ -1,10 +1,10 @@
 <?php
 
-namespace Tests\Fakes\DTOAssembler;
+namespace Tests\Fakes\RequestDataAssembler;
 
-use App\Application\Shared\DTO\BaseDTO;
+use App\Application\Shared\RequestData\BaseRequestData;
 
-readonly class TestUserDTO extends BaseDTO
+readonly class TestUserRequestData extends BaseRequestData
 {
     public function __construct(
         private string $firstName,

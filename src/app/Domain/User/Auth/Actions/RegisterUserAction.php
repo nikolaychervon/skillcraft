@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Domain\User\Auth\Actions;
 
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Domain\User\Auth\Services\NotificationServiceInterface;
 use App\Models\User;
@@ -18,12 +18,12 @@ class RegisterUserAction
     ) {
     }
 
-    public function run(CreatingUserDTO $creatingUserDTO): User
+    public function run(CreatingUserRequestData $creatingUserRequestData): User
     {
-        $user = $this->userRepository->findByEmail($creatingUserDTO->getEmail());
+        $user = $this->userRepository->findByEmail($creatingUserRequestData->getEmail());
 
         if (!$user instanceof User) {
-            $user = $this->createNewUserAction->run($creatingUserDTO);
+            $user = $this->createNewUserAction->run($creatingUserRequestData);
         }
 
         $this->notificationService->sendEmailVerificationNotification($user);

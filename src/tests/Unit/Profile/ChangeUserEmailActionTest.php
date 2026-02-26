@@ -3,7 +3,7 @@
 namespace Tests\Unit\Profile;
 
 use App\Domain\User\Profile\Actions\ChangeUserEmailAction;
-use App\Domain\User\Profile\DTO\ChangeUserEmailDTO;
+use App\Domain\User\Profile\RequestData\ChangeUserEmailRequestData;
 use App\Domain\User\Profile\Services\ProfileNotificationServiceInterface;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Models\User;
@@ -23,7 +23,7 @@ class ChangeUserEmailActionTest extends TestCase
         $action = new ChangeUserEmailAction($repo, $notificationService);
 
         $user = new User();
-        $dto = new ChangeUserEmailDTO('new@example.com');
+        $requestData = new ChangeUserEmailRequestData('new@example.com');
 
         $repo->shouldReceive('setPendingEmail')
             ->once()
@@ -35,6 +35,6 @@ class ChangeUserEmailActionTest extends TestCase
             ->with($user, 'new@example.com')
             ->andReturnNull();
 
-        $action->run($user, $dto);
+        $action->run($user, $requestData);
     }
 }

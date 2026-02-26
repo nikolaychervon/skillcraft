@@ -5,7 +5,7 @@ namespace Tests\Feature\Auth;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
 use App\Models\User;
@@ -34,7 +34,7 @@ class PasswordResetControllerTest extends TestCase
         $this->cache = app(PasswordResetTokensCacheInterface::class);
 
         $createUserAction = app(CreateNewUserAction::class);
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: $this->email,
@@ -43,7 +43,7 @@ class PasswordResetControllerTest extends TestCase
             middleName: null
         );
 
-        $this->user = $createUserAction->run($dto);
+        $this->user = $createUserAction->run($requestData);
         $this->user->markEmailAsVerified();
     }
 

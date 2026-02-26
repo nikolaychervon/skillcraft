@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Application\User\Auth\Assemblers\LoginUserDTOAssembler;
+use App\Application\User\Auth\Assemblers\LoginUserRequestDataAssembler;
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
 use App\Domain\User\Auth\Actions\LoginUserAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,7 +17,7 @@ class AuthorizeUserActionTest extends TestCase
 
     private LoginUserAction $action;
     private CreateNewUserAction $createUserAction;
-    private LoginUserDTOAssembler $loginUserDtoAssembler;
+    private LoginUserRequestDataAssembler $loginUserRequestDataAssembler;
     private User $user;
     private string $password = 'Password123!';
 
@@ -27,7 +27,7 @@ class AuthorizeUserActionTest extends TestCase
         $this->action = app(LoginUserAction::class);
         $this->createUserAction = app(CreateNewUserAction::class);
 
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'ivan@example.com',
@@ -36,19 +36,19 @@ class AuthorizeUserActionTest extends TestCase
             middleName: null
         );
 
-        $this->user = $this->createUserAction->run($dto);
-        $this->loginUserDtoAssembler = app(LoginUserDTOAssembler::class);
+        $this->user = $this->createUserAction->run($requestData);
+        $this->loginUserRequestDataAssembler = app(LoginUserRequestDataAssembler::class);
     }
 
     public function test_it_returns_token_on_successful_login(): void
     {
         $this->user->markEmailAsVerified();
-        $dto = $this->loginUserDtoAssembler->assemble([
+        $requestData = $this->loginUserRequestDataAssembler->assemble([
             'email' => 'ivan@example.com',
             'password' => $this->password,
         ]);
 
-        $token = $this->action->run($dto);
+        $token = $this->action->run($requestData);
 
         $this->assertIsString($token);
         $this->assertNotEmpty($token);
@@ -63,12 +63,12 @@ class AuthorizeUserActionTest extends TestCase
     {
         $this->expectException(IncorrectLoginDataException::class);
 
-        $dto = $this->loginUserDtoAssembler->assemble([
+        $requestData = $this->loginUserRequestDataAssembler->assemble([
             'email' => 'nonexistent@example.com',
             'password' => $this->password,
         ]);
 
-        $this->action->run($dto);
+        $this->action->run($requestData);
     }
 
     public function test_it_throws_exception_when_password_is_incorrect(): void
@@ -78,57 +78,57 @@ class AuthorizeUserActionTest extends TestCase
 
         $this->expectException(IncorrectLoginDataException::class);
 
-        $dto = $this->loginUserDtoAssembler->assemble([
+        $requestData = $this->loginUserRequestDataAssembler->assemble([
             'email' => 'ivan@example.com',
             'password' => 'WrongPassword123!',
         ]);
 
-        $this->action->run($dto);
+        $this->action->run($requestData);
     }
 
     public function test_it_throws_exception_when_email_not_verified(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
 
-        $dto = $this->loginUserDtoAssembler->assemble([
+        $requestData = $this->loginUserRequestDataAssembler->assemble([
             'email' => 'ivan@example.com',
             'password' => $this->password,
         ]);
 
-        $this->action->run($dto);
+        $this->action->run($requestData);
     }
 
     public function test_it_throws_exception_when_email_is_empty(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
 
-        $dto = $this->loginUserDtoAssembler->assemble([
+        $requestData = $this->loginUserRequestDataAssembler->assemble([
             'email' => '',
             'password' => $this->password,
         ]);
 
-        $this->action->run($dto);
+        $this->action->run($requestData);
     }
 
     public function test_it_throws_exception_when_password_is_empty(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
-        $dto = $this->loginUserDtoAssembler->assemble([
+        $requestData = $this->loginUserRequestDataAssembler->assemble([
             'email' => 'ivan@example.com',
             'password' => '',
         ]);
 
-        $this->action->run($dto);
+        $this->action->run($requestData);
     }
 
     public function test_it_throws_exception_with_non_existent_user(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
-        $dto = $this->loginUserDtoAssembler->assemble([
+        $requestData = $this->loginUserRequestDataAssembler->assemble([
             'email' => 'deleted@example.com',
             'password' => $this->password,
         ]);
 
-        $this->action->run($dto);
+        $this->action->run($requestData);
     }
 }

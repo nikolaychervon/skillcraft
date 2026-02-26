@@ -7,7 +7,7 @@ use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
 use App\Domain\User\Auth\Actions\Email\VerifyEmailAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -29,7 +29,7 @@ class VerifyEmailActionTest extends TestCase
         $this->action = app(VerifyEmailAction::class);
         $this->createUserAction = app(CreateNewUserAction::class);
 
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: $this->email,
@@ -38,7 +38,7 @@ class VerifyEmailActionTest extends TestCase
             middleName: null
         );
 
-        $this->user = $this->createUserAction->run($dto);
+        $this->user = $this->createUserAction->run($requestData);
         $this->hash = sha1($this->user->getEmailForVerification());
     }
 

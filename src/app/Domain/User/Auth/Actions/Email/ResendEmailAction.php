@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Domain\User\Auth\Actions\Email;
 
 use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
-use App\Domain\User\Auth\DTO\ResendEmailDTO;
+use App\Domain\User\Auth\RequestData\ResendEmailRequestData;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 use App\Domain\User\Auth\Services\NotificationServiceInterface;
 use App\Models\User;
@@ -21,9 +21,9 @@ class ResendEmailAction
     /**
      * @throws EmailAlreadyVerifiedException
      */
-    public function run(ResendEmailDTO $resendEmailDTO): void
+    public function run(ResendEmailRequestData $resendEmailRequestData): void
     {
-        $user = $this->userRepository->findByEmail($resendEmailDTO->getEmail());
+        $user = $this->userRepository->findByEmail($resendEmailRequestData->getEmail());
         if (!$user instanceof User) {
             return;
         }

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Domain\User\Exceptions\UserNotFoundException;
-use App\Application\User\Auth\Assemblers\ResetPasswordDTOAssembler;
+use App\Application\User\Auth\Assemblers\ResetPasswordRequestDataAssembler;
 use App\Domain\User\Auth\Actions\Password\ResetPasswordAction;
 use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
 use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
@@ -18,7 +18,7 @@ use Illuminate\Http\JsonResponse;
 
 class PasswordResetController extends Controller
 {
-    public function __construct(private readonly ResetPasswordDTOAssembler $resetPasswordDTOAssembler)
+    public function __construct(private readonly ResetPasswordRequestDataAssembler $resetPasswordRequestDataAssembler)
     {
     }
 
@@ -46,8 +46,8 @@ class PasswordResetController extends Controller
      */
     public function reset(ResetPasswordRequest $request, ResetPasswordAction $resetPasswordAction): JsonResponse
     {
-        $resetPasswordDTO = $this->resetPasswordDTOAssembler->assemble($request->validated());
-        $token = $resetPasswordAction->run($resetPasswordDTO);
+        $resetPasswordRequestData = $this->resetPasswordRequestDataAssembler->assemble($request->validated());
+        $token = $resetPasswordAction->run($resetPasswordRequestData);
 
         return ApiResponse::success(
             message: __('messages.password-reset-successful'),

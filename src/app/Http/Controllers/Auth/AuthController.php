@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Application\Shared\Constants\HttpCodesConstants;
-use App\Application\User\Auth\Assemblers\CreatingUserDTOAssembler;
-use App\Application\User\Auth\Assemblers\LoginUserDTOAssembler;
+use App\Application\User\Auth\Assemblers\CreatingUserRequestDataAssembler;
+use App\Application\User\Auth\Assemblers\LoginUserRequestDataAssembler;
 use App\Domain\User\Auth\Actions\LoginUserAction;
 use App\Domain\User\Auth\Actions\LogoutAllUserAction;
 use App\Domain\User\Auth\Actions\LogoutUserAction;
@@ -22,8 +22,8 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     public function __construct(
-        private readonly CreatingUserDTOAssembler $creatingUserDTOAssembler,
-        private readonly LoginUserDTOAssembler $loginUserDTOAssembler,
+        private readonly CreatingUserRequestDataAssembler $creatingUserRequestDataAssembler,
+        private readonly LoginUserRequestDataAssembler $loginUserRequestDataAssembler,
     ) {
     }
 
@@ -36,8 +36,8 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request, LoginUserAction $loginUserAction): JsonResponse
     {
-        $loginUserDTO = $this->loginUserDTOAssembler->assemble($request->validated());
-        $token = $loginUserAction->run($loginUserDTO);
+        $loginUserRequestData = $this->loginUserRequestDataAssembler->assemble($request->validated());
+        $token = $loginUserAction->run($loginUserRequestData);
 
         return ApiResponse::success(
             message: __('auth.login'),
@@ -52,8 +52,8 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request, RegisterUserAction $registerUserAction): JsonResponse
     {
-        $creatingUserDTO = $this->creatingUserDTOAssembler->assemble($request->validated());
-        $user = $registerUserAction->run($creatingUserDTO);
+        $creatingUserRequestData = $this->creatingUserRequestDataAssembler->assemble($request->validated());
+        $user = $registerUserAction->run($creatingUserRequestData);
 
         return ApiResponse::success(
             message: __('messages.email-verify'),

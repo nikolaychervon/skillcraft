@@ -5,7 +5,7 @@ namespace Tests\Unit\Auth;
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
 use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -30,7 +30,7 @@ class SendPasswordResetLinkActionTest extends TestCase
         Notification::fake();
 
         $createUserAction = app(CreateNewUserAction::class);
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: $this->email,
@@ -39,7 +39,7 @@ class SendPasswordResetLinkActionTest extends TestCase
             middleName: null
         );
 
-        $this->user = $createUserAction->run($dto);
+        $this->user = $createUserAction->run($requestData);
         $this->user->markEmailAsVerified();
     }
 

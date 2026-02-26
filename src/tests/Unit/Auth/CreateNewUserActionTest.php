@@ -3,7 +3,7 @@
 namespace Tests\Unit\Auth;
 
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -23,7 +23,7 @@ class CreateNewUserActionTest extends TestCase
 
     public function test_it_creates_user_successfully(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'ivan@example.com',
@@ -32,7 +32,7 @@ class CreateNewUserActionTest extends TestCase
             middleName: 'Иванович'
         );
 
-        $user = $this->action->run($dto);
+        $user = $this->action->run($requestData);
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertDatabaseHas('users', [
@@ -49,7 +49,7 @@ class CreateNewUserActionTest extends TestCase
 
     public function test_it_creates_user_without_middle_name(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Петр',
             lastName: 'Иванов',
             email: 'petr@example.com',
@@ -58,7 +58,7 @@ class CreateNewUserActionTest extends TestCase
             middleName: null
         );
 
-        $user = $this->action->run($dto);
+        $user = $this->action->run($requestData);
 
         $this->assertDatabaseHas('users', [
             'email' => 'petr@example.com',
@@ -73,7 +73,7 @@ class CreateNewUserActionTest extends TestCase
 
     public function test_it_hashes_password(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'hash@example.com',
@@ -82,7 +82,7 @@ class CreateNewUserActionTest extends TestCase
             middleName: null
         );
 
-        $user = $this->action->run($dto);
+        $user = $this->action->run($requestData);
 
         $this->assertNotEquals('PlainTextPassword123!', $user->password);
         $this->assertTrue(Hash::check('PlainTextPassword123!', $user->password));

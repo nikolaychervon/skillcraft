@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\User\Auth\DTO;
+namespace App\Domain\User\Auth\RequestData;
 
-use App\Application\Shared\DTO\BaseDTO;
+use App\Application\Shared\RequestData\BaseRequestData;
 
-readonly class LoginUserDTO extends BaseDTO
+readonly class LoginUserRequestData extends BaseRequestData
 {
     public function __construct(
         private string $email,

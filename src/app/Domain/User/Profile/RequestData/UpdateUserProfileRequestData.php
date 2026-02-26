@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\User\Profile\DTO;
+namespace App\Domain\User\Profile\RequestData;
 
-use App\Application\Shared\DTO\BaseDTO;
+use App\Application\Shared\RequestData\BaseRequestData;
 
-readonly class UpdateUserProfileDTO extends BaseDTO
+readonly class UpdateUserProfileRequestData extends BaseRequestData
 {
     public function __construct(
         private ?string $firstName = null,
