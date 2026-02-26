@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Profile;
 
-use App\Application\User\Profile\Assemblers\ChangeUserEmailRequestDataAssembler;
-use App\Application\User\Profile\Assemblers\ChangeUserPasswordRequestDataAssembler;
-use App\Application\User\Profile\Assemblers\UpdateUserProfileRequestDataAssembler;
 use App\Domain\User\Profile\Actions\ChangeUserEmailAction;
 use App\Domain\User\Profile\Actions\ChangeUserPasswordAction;
 use App\Domain\User\Profile\Actions\GetUserProfileAction;
 use App\Domain\User\Profile\Actions\UpdateUserProfileAction;
-use App\Domain\User\Profile\Exceptions\IncorrectCurrentPasswordException;
+use App\Domain\User\Profile\RequestData\ChangeUserEmailRequestData;
+use App\Domain\User\Profile\RequestData\ChangeUserPasswordRequestData;
+use App\Domain\User\Profile\RequestData\UpdateUserProfileRequestData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Profile\ChangeEmailRequest;
 use App\Http\Requests\Profile\ChangePasswordRequest;
@@ -23,13 +22,6 @@ use Illuminate\Http\Request;
 
 class ProfileController extends Controller
 {
-    public function __construct(
-        private readonly UpdateUserProfileRequestDataAssembler $updateUserProfileRequestDataAssembler,
-        private readonly ChangeUserEmailRequestDataAssembler $changeUserEmailRequestDataAssembler,
-        private readonly ChangeUserPasswordRequestDataAssembler $changeUserPasswordRequestDataAssembler,
-    ) {
-    }
-
     public function show(Request $request, GetUserProfileAction $action): JsonResponse
     {
         $user = $action->run($request->user());
@@ -38,35 +30,25 @@ class ProfileController extends Controller
 
     public function update(UpdateProfileRequest $request, UpdateUserProfileAction $action): JsonResponse
     {
-        $requestData = $this->updateUserProfileRequestDataAssembler->assemble($request->validated());
-        $user = $action->run($request->user(), $requestData);
+        $data = UpdateUserProfileRequestData::fromArray($request->validated());
+        $user = $action->run($request->user(), $data);
 
-        return ApiResponse::success(
-            message: __('messages.profile-updated'),
-            data: UserProfileResource::make($user),
-        );
+        return ApiResponse::success(__('messages.profile-updated'), UserProfileResource::make($user));
     }
 
     public function changeEmail(ChangeEmailRequest $request, ChangeUserEmailAction $action): JsonResponse
     {
-        $user = $request->user();
-        $requestData = $this->changeUserEmailRequestDataAssembler->assemble($request->validated());
-        $action->run($user, $requestData);
+        $data = ChangeUserEmailRequestData::fromArray($request->validated());
+        $action->run($request->user(), $data);
 
-        return ApiResponse::success(
-            message: __('messages.email-verify'),
-            data: ['email' => $requestData->getEmail()],
-        );
+        return ApiResponse::success(__('messages.email-verify'), ['email' => $data->email]);
     }
 
-    /**
-     * @throws IncorrectCurrentPasswordException
-     */
     public function changePassword(ChangePasswordRequest $request, ChangeUserPasswordAction $action): JsonResponse
     {
-        $requestData = $this->changeUserPasswordRequestDataAssembler->assemble($request->validated());
-        $action->run($request->user(), $requestData);
+        $data = ChangeUserPasswordRequestData::fromArray($request->validated());
+        $action->run($request->user(), $data);
 
-        return ApiResponse::success(message: __('messages.password-changed'));
+        return ApiResponse::success(__('messages.password-changed'));
     }
 }

@@ -20,7 +20,7 @@ class RegisterUserAction
 
     public function run(CreatingUserRequestData $creatingUserRequestData): User
     {
-        $user = $this->userRepository->findByEmail($creatingUserRequestData->getEmail());
+        $user = $this->userRepository->findByEmail($creatingUserRequestData->email);
 
         if (!$user instanceof User) {
             $user = $this->createNewUserAction->run($creatingUserRequestData);

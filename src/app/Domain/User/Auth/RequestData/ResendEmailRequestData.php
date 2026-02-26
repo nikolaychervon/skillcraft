@@ -6,15 +6,9 @@ namespace App\Domain\User\Auth\RequestData;
 
 use App\Application\Shared\RequestData\BaseRequestData;
 
-readonly class ResendEmailRequestData extends BaseRequestData
+final readonly class ResendEmailRequestData extends BaseRequestData
 {
     public function __construct(
-        private string $email,
-    ) {
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
+        public string $email,
+    ) {}
 }

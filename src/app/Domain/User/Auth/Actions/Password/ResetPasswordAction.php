@@ -35,14 +35,14 @@ class ResetPasswordAction
      */
     public function run(ResetPasswordRequestData $resetPasswordRequestData): string
     {
-        $token = $this->passwordResetTokensCache->get($resetPasswordRequestData->getEmail());
-        if (!$token || $token !== $resetPasswordRequestData->getResetToken()) {
+        $token = $this->passwordResetTokensCache->get($resetPasswordRequestData->email);
+        if (!$token || $token !== $resetPasswordRequestData->resetToken) {
             throw new InvalidResetTokenException();
         }
 
-        $user = $this->userRepository->findByEmail($resetPasswordRequestData->getEmail());
+        $user = $this->userRepository->findByEmail($resetPasswordRequestData->email);
         if (!$user instanceof User) {
-            throw new UserNotFoundException(['email' => $resetPasswordRequestData->getEmail()]);
+            throw new UserNotFoundException(['email' => $resetPasswordRequestData->email]);
         }
 
         return $this->reset($user, $resetPasswordRequestData);
@@ -55,17 +55,17 @@ class ResetPasswordAction
     {
         try {
             return $this->transactionService->transaction(function () use ($user, $resetPasswordRequestData) {
-                $hashedPassword = $this->hashService->make($resetPasswordRequestData->getPassword());
+                $hashedPassword = $this->hashService->make($resetPasswordRequestData->password);
                 $this->userRepository->updatePassword($user, $hashedPassword);
 
-                $this->passwordResetTokensCache->delete($resetPasswordRequestData->getEmail());
+                $this->passwordResetTokensCache->delete($resetPasswordRequestData->email);
                 $this->tokenService->deleteAllTokens($user);
 
                 return $this->tokenService->createAuthToken($user, AuthConstants::DEFAULT_TOKEN_NAME);
             });
         } catch (\Throwable $e) {
             Log::error('Password reset failed', [
-                'email' => $resetPasswordRequestData->getEmail(),
+                'email' => $resetPasswordRequestData->email,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);

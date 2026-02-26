@@ -19,7 +19,7 @@ class ChangeUserEmailAction
 
     public function run(User $user, ChangeUserEmailRequestData $requestData): void
     {
-        $this->userRepository->setPendingEmail($user, $requestData->getEmail());
-        $this->notificationService->sendEmailChangeVerificationNotification($user, $requestData->getEmail());
+        $this->userRepository->setPendingEmail($user, $requestData->email);
+        $this->notificationService->sendEmailChangeVerificationNotification($user, $requestData->email);
     }
 }

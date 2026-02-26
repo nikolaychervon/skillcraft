@@ -1,60 +1,45 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Responses;
 
-use App\Application\Shared\Constants\HttpCodesConstants;
+use App\Support\Http\HttpCode;
 use Illuminate\Http\JsonResponse;
 
-class ApiResponse
+final class ApiResponse
 {
-    /**
-     * @param string $message
-     * @param mixed|null $data
-     * @param int $code
-     * @return JsonResponse
-     */
     public static function success(
         string $message = 'Success',
         mixed $data = null,
-        int $code = HttpCodesConstants::HTTP_OK
-    ) : JsonResponse {
+        HttpCode|int $code = HttpCode::Ok,
+    ): JsonResponse {
         return response()->json([
             'success' => true,
             'message' => $message,
             'data' => $data,
-        ], $code);
+        ], self::statusCode($code));
     }
 
-    /**
-     * @param string $message
-     * @param int $code
-     * @param mixed|null $errors
-     * @return JsonResponse
-     */
     public static function error(
         string $message = 'Error',
-        int $code = HttpCodesConstants::HTTP_BAD_REQUEST,
-        mixed $errors = null
+        HttpCode|int $code = HttpCode::BadRequest,
+        mixed $errors = null,
     ): JsonResponse {
-        $response = [
-            'success' => false,
-            'message' => $message,
-        ];
-
-        if (!is_null($errors)) {
-            $response['errors'] = $errors;
+        $payload = ['success' => false, 'message' => $message];
+        if ($errors !== null) {
+            $payload['errors'] = $errors;
         }
-
-        return response()->json($response, $code);
+        return response()->json($payload, self::statusCode($code));
     }
 
-    /**
-     * @param mixed|null $errors
-     * @param string $message
-     * @return JsonResponse
-     */
     public static function validationError(mixed $errors = null, string $message = 'Validation Error'): JsonResponse
     {
-        return self::error($message, HttpCodesConstants::HTTP_VALIDATION_ERROR, $errors);
+        return self::error($message, HttpCode::ValidationError, $errors);
+    }
+
+    private static function statusCode(HttpCode|int $code): int
+    {
+        return $code instanceof HttpCode ? $code->value : $code;
     }
 }

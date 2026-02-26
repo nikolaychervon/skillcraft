@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domain\User\Exceptions;
 
-use App\Application\Shared\Constants\HttpCodesConstants;
 use App\Application\Shared\Exceptions\ApiException;
+use App\Support\Http\HttpCode;
 
 class UserNotFoundException extends ApiException
 {
-    protected $code = HttpCodesConstants::HTTP_NOT_FOUND;
+    protected HttpCode $statusCode = HttpCode::NotFound;
 
     /**
      * @param array<string, mixed> $searchData
@@ -19,13 +19,9 @@ class UserNotFoundException extends ApiException
         parent::__construct();
     }
 
-    /**
-     * @return array{search_data: array<string, mixed>}|null
-     */
+    /** @return array{search_data: array<string, mixed>}|null */
     public function getData(): ?array
     {
-        return [
-            'search_data' => $this->searchData,
-        ];
+        return ['search_data' => $this->searchData];
     }
 }

@@ -6,27 +6,11 @@ namespace App\Domain\User\Auth\RequestData;
 
 use App\Application\Shared\RequestData\BaseRequestData;
 
-readonly class ResetPasswordRequestData extends BaseRequestData
+final readonly class ResetPasswordRequestData extends BaseRequestData
 {
     public function __construct(
-        private string $email,
-        private string $resetToken,
-        private string $password,
-    ) {
-    }
-
-    public function getEmail(): string
-    {
-        return $this->email;
-    }
-
-    public function getResetToken(): string
-    {
-        return $this->resetToken;
-    }
-
-    public function getPassword(): string
-    {
-        return $this->password;
-    }
+        public string $email,
+        public string $resetToken,
+        public string $password,
+    ) {}
 }

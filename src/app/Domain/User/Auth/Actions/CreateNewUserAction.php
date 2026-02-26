@@ -19,14 +19,14 @@ class CreateNewUserAction
 
     public function run(CreatingUserRequestData $creatingUserRequestData): User
     {
-        $hashedPassword = $this->hashService->make($creatingUserRequestData->getPassword());
+        $hashedPassword = $this->hashService->make($creatingUserRequestData->password);
         return $this->userRepository->create([
-            'first_name' => $creatingUserRequestData->getFirstName(),
-            'last_name' => $creatingUserRequestData->getLastName(),
-            'middle_name' => $creatingUserRequestData->getMiddleName(),
-            'email' => $creatingUserRequestData->getEmail(),
+            'first_name' => $creatingUserRequestData->firstName,
+            'last_name' => $creatingUserRequestData->lastName,
+            'middle_name' => $creatingUserRequestData->middleName,
+            'email' => $creatingUserRequestData->email,
             'password' => $hashedPassword,
-            'unique_nickname' => $creatingUserRequestData->getUniqueNickname(),
+            'unique_nickname' => $creatingUserRequestData->uniqueNickname,
         ]);
     }
 }

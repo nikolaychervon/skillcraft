@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
-use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
-use App\Domain\User\Exceptions\UserNotFoundException;
-use App\Application\User\Auth\Assemblers\ResendEmailRequestDataAssembler;
 use App\Domain\User\Auth\Actions\Email\ResendEmailAction;
 use App\Domain\User\Auth\Actions\Email\VerifyEmailAction;
+use App\Domain\User\Auth\RequestData\ResendEmailRequestData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ResendEmailRequest;
 use App\Http\Responses\ApiResponse;
@@ -17,41 +14,17 @@ use Illuminate\Http\JsonResponse;
 
 class EmailVerificationController extends Controller
 {
-    public function __construct(private readonly ResendEmailRequestDataAssembler $resendEmailRequestDataAssembler)
-    {
-    }
-
-    /**
-     * @param int $id
-     * @param string $hash
-     * @param VerifyEmailAction $verifyEmailAction
-     * @return JsonResponse
-     *
-     * @throws EmailAlreadyVerifiedException
-     * @throws InvalidConfirmationLinkException
-     * @throws UserNotFoundException
-     */
     public function verify(int $id, string $hash, VerifyEmailAction $verifyEmailAction): JsonResponse
     {
         $token = $verifyEmailAction->run($id, $hash);
 
-        return ApiResponse::success(
-            message: __('messages.email-confirmed'),
-            data: ['token' => $token]
-        );
+        return ApiResponse::success(__('messages.email-confirmed'), ['token' => $token]);
     }
 
-    /**
-     * @param ResendEmailRequest $request
-     * @param ResendEmailAction $resendEmailAction
-     * @return JsonResponse
-     *
-     * @throws EmailAlreadyVerifiedException
-     */
     public function resend(ResendEmailRequest $request, ResendEmailAction $resendEmailAction): JsonResponse
     {
-        $resendEmailRequestData = $this->resendEmailRequestDataAssembler->assemble($request->validated());
-        $resendEmailAction->run($resendEmailRequestData);
+        $data = ResendEmailRequestData::fromArray($request->validated());
+        $resendEmailAction->run($data);
 
         return ApiResponse::success(__('messages.email-resend'));
     }

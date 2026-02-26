@@ -27,13 +27,13 @@ class LoginUserAction
      */
     public function run(LoginUserRequestData $userRequestData): string
     {
-        $user = $this->userRepository->findByEmail($userRequestData->getEmail());
+        $user = $this->userRepository->findByEmail($userRequestData->email);
 
         if ($this->userNotConfirmedSpecification->isSatisfiedBy($user)) {
             throw new IncorrectLoginDataException();
         }
 
-        if (!$this->hashService->check($userRequestData->getPassword(), $user->password)) {
+        if (!$this->hashService->check($userRequestData->password, $user->password)) {
             throw new IncorrectLoginDataException();
         }
 

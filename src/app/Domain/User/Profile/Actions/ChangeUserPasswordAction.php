@@ -23,11 +23,11 @@ class ChangeUserPasswordAction
      */
     public function run(User $user, ChangeUserPasswordRequestData $requestData): void
     {
-        if (!$this->hashService->check($requestData->getOldPassword(), $user->password)) {
+        if (!$this->hashService->check($requestData->oldPassword, $user->password)) {
             throw new IncorrectCurrentPasswordException();
         }
 
-        $hashedPassword = $this->hashService->make($requestData->getPassword());
+        $hashedPassword = $this->hashService->make($requestData->password);
         $this->userRepository->updatePassword($user, $hashedPassword);
     }
 }

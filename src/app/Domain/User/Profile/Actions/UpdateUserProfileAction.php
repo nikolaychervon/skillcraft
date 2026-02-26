@@ -18,10 +18,10 @@ class UpdateUserProfileAction
     public function run(User $user, UpdateUserProfileRequestData $requestData): User
     {
         return $this->userRepository->update($user, [
-            'first_name' => $requestData->getFirstName(),
-            'last_name' => $requestData->getLastName(),
-            'middle_name' => $requestData->getMiddleName(),
-            'unique_nickname' => $requestData->getUniqueNickname(),
+            'first_name' => $requestData->firstName,
+            'last_name' => $requestData->lastName,
+            'middle_name' => $requestData->middleName,
+            'unique_nickname' => $requestData->uniqueNickname,
         ]);
     }
 }

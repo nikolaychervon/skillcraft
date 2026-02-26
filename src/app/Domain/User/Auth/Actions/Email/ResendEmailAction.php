@@ -23,7 +23,7 @@ class ResendEmailAction
      */
     public function run(ResendEmailRequestData $resendEmailRequestData): void
     {
-        $user = $this->userRepository->findByEmail($resendEmailRequestData->getEmail());
+        $user = $this->userRepository->findByEmail($resendEmailRequestData->email);
         if (!$user instanceof User) {
             return;
         }

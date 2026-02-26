@@ -33,11 +33,11 @@ class RegisterUserActionTest extends TestCase
 
         $user = new User();
         $user->id = 123;
-        $user->email = $requestData->getEmail();
+        $user->email = $requestData->email;
 
         $repo->shouldReceive('findByEmail')
             ->once()
-            ->with($requestData->getEmail())
+            ->with($requestData->email)
             ->andReturn(null);
 
         $createNewUserAction->shouldReceive('run')
@@ -78,11 +78,11 @@ class RegisterUserActionTest extends TestCase
 
         $existingUser = new User();
         $existingUser->id = 456;
-        $existingUser->email = $requestData->getEmail();
+        $existingUser->email = $requestData->email;
 
         $repo->shouldReceive('findByEmail')
             ->once()
-            ->with($requestData->getEmail())
+            ->with($requestData->email)
             ->andReturn($existingUser);
 
         $createNewUserAction->shouldNotReceive('run');

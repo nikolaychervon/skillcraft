@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Auth;
 
-use App\Application\User\Auth\Assemblers\LoginUserRequestDataAssembler;
 use App\Domain\User\Auth\Actions\CreateNewUserAction;
 use App\Domain\User\Auth\Actions\LoginUserAction;
-use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
+use App\Domain\User\Auth\RequestData\LoginUserRequestData;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -17,7 +19,6 @@ class AuthorizeUserActionTest extends TestCase
 
     private LoginUserAction $action;
     private CreateNewUserAction $createUserAction;
-    private LoginUserRequestDataAssembler $loginUserRequestDataAssembler;
     private User $user;
     private string $password = 'Password123!';
 
@@ -33,29 +34,27 @@ class AuthorizeUserActionTest extends TestCase
             email: 'ivan@example.com',
             uniqueNickname: 'ivan_petrov',
             password: $this->password,
-            middleName: null
+            middleName: null,
         );
 
         $this->user = $this->createUserAction->run($requestData);
-        $this->loginUserRequestDataAssembler = app(LoginUserRequestDataAssembler::class);
     }
 
     public function test_it_returns_token_on_successful_login(): void
     {
         $this->user->markEmailAsVerified();
-        $requestData = $this->loginUserRequestDataAssembler->assemble([
+        $data = LoginUserRequestData::fromArray([
             'email' => 'ivan@example.com',
             'password' => $this->password,
         ]);
 
-        $token = $this->action->run($requestData);
+        $token = $this->action->run($data);
 
         $this->assertIsString($token);
         $this->assertNotEmpty($token);
-
         $this->assertDatabaseHas('personal_access_tokens', [
             'tokenable_id' => $this->user->id,
-            'name' => 'auth_token'
+            'name' => 'auth_token',
         ]);
     }
 
@@ -63,72 +62,66 @@ class AuthorizeUserActionTest extends TestCase
     {
         $this->expectException(IncorrectLoginDataException::class);
 
-        $requestData = $this->loginUserRequestDataAssembler->assemble([
+        $data = LoginUserRequestData::fromArray([
             'email' => 'nonexistent@example.com',
             'password' => $this->password,
         ]);
-
-        $this->action->run($requestData);
+        $this->action->run($data);
     }
 
     public function test_it_throws_exception_when_password_is_incorrect(): void
     {
-        // важно: пользователь должен быть подтвержден, иначе упадем на проверке email verification
         $this->user->markEmailAsVerified();
-
         $this->expectException(IncorrectLoginDataException::class);
 
-        $requestData = $this->loginUserRequestDataAssembler->assemble([
+        $data = LoginUserRequestData::fromArray([
             'email' => 'ivan@example.com',
             'password' => 'WrongPassword123!',
         ]);
-
-        $this->action->run($requestData);
+        $this->action->run($data);
     }
 
     public function test_it_throws_exception_when_email_not_verified(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
 
-        $requestData = $this->loginUserRequestDataAssembler->assemble([
+        $data = LoginUserRequestData::fromArray([
             'email' => 'ivan@example.com',
             'password' => $this->password,
         ]);
-
-        $this->action->run($requestData);
+        $this->action->run($data);
     }
 
     public function test_it_throws_exception_when_email_is_empty(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
 
-        $requestData = $this->loginUserRequestDataAssembler->assemble([
+        $data = LoginUserRequestData::fromArray([
             'email' => '',
             'password' => $this->password,
         ]);
-
-        $this->action->run($requestData);
+        $this->action->run($data);
     }
 
     public function test_it_throws_exception_when_password_is_empty(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
-        $requestData = $this->loginUserRequestDataAssembler->assemble([
+
+        $data = LoginUserRequestData::fromArray([
             'email' => 'ivan@example.com',
             'password' => '',
         ]);
-
-        $this->action->run($requestData);
+        $this->action->run($data);
     }
 
     public function test_it_throws_exception_with_non_existent_user(): void
     {
         $this->expectException(IncorrectLoginDataException::class);
-        $requestData = $this->loginUserRequestDataAssembler->assemble([
+
+        $data = LoginUserRequestData::fromArray([
             'email' => 'deleted@example.com',
             'password' => $this->password,
         ]);
-
-        $this->action->run($requestData);
+        $this->action->run($data);
     }
 }
