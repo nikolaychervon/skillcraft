@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Domain\User\Auth\Specifications;
 
-use App\Models\User;
+use App\Domain\User\User;
 
-class UserNotConfirmedSpecification
+final readonly class UserNotConfirmedSpecification
 {
     public function isSatisfiedBy(?User $user): bool
     {
-        return !$user || !$user->hasVerifiedEmail();
+        return $user === null || !$user->hasVerifiedEmail();
     }
 }

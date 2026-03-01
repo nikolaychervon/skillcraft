@@ -4,54 +4,40 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Domain\User\Exceptions\UserNotFoundException;
-use App\Application\User\Auth\Assemblers\ResetPasswordDTOAssembler;
-use App\Domain\User\Auth\Actions\Password\ResetPasswordAction;
-use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
+use App\Application\User\Auth\ResetPassword;
+use App\Application\User\Auth\SendPasswordResetLink;
 use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
 use App\Domain\User\Auth\Exceptions\PasswordResetFailedException;
+use App\Domain\User\Auth\RequestData\ResetPasswordRequestData;
+use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
-class PasswordResetController extends Controller
+final class PasswordResetController extends Controller
 {
-    public function __construct(private readonly ResetPasswordDTOAssembler $resetPasswordDTOAssembler)
+    public function forgot(ForgotPasswordRequest $request, SendPasswordResetLink $sendPasswordResetLink): JsonResponse
     {
+        $sendPasswordResetLink->run($request->getEmail());
+
+        return ApiResponse::success(message: __('messages.password-reset-link'));
     }
 
     /**
-     * @param ForgotPasswordRequest $request
-     * @param SendPasswordResetLinkAction $sendPasswordResetLinkAction
-     * @return JsonResponse
-     */
-    public function forgot(
-        ForgotPasswordRequest $request,
-        SendPasswordResetLinkAction $sendPasswordResetLinkAction
-    ): JsonResponse {
-        $sendPasswordResetLinkAction->run($request->getEmail());
-        return ApiResponse::success(__('messages.password-reset-link'));
-    }
-
-    /**
-     * @param ResetPasswordRequest $request
-     * @param ResetPasswordAction $resetPasswordAction
-     * @return JsonResponse
-     *
-     * @throws InvalidResetTokenException
      * @throws PasswordResetFailedException
      * @throws UserNotFoundException
+     * @throws InvalidResetTokenException
      */
-    public function reset(ResetPasswordRequest $request, ResetPasswordAction $resetPasswordAction): JsonResponse
+    public function reset(ResetPasswordRequest $request, ResetPassword $resetPassword): JsonResponse
     {
-        $resetPasswordDTO = $this->resetPasswordDTOAssembler->assemble($request->validated());
-        $token = $resetPasswordAction->run($resetPasswordDTO);
+        $data = ResetPasswordRequestData::fromArray($request->validated());
+        $token = $resetPassword->run($data);
 
         return ApiResponse::success(
             message: __('messages.password-reset-successful'),
-            data: ['token' => $token],
+            data: ['token' => $token]
         );
     }
 }

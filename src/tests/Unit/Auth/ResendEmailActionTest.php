@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Auth;
 
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\ResendVerificationEmail;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
+use App\Domain\User\Auth\RequestData\ResendEmailRequestData;
 use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
-use App\Application\User\Auth\Assemblers\ResendEmailDTOAssembler;
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\Email\ResendEmailAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Repositories\UserRepositoryInterface;
+use App\Domain\User\User as DomainUser;
 use App\Infrastructure\Notifications\Auth\VerifyEmailForRegisterNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,77 +21,72 @@ class ResendEmailActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private ResendEmailAction $action;
-    private CreateNewUserAction $createUserAction;
-    private ResendEmailDTOAssembler $resendEmailDTOAssembler;
+    private ResendVerificationEmail $action;
+
+    private CreateNewUser $createUserAction;
+
     private User $user;
+
+    private DomainUser $domainUser;
+
     private string $email = 'test@example.com';
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(ResendEmailAction::class);
-        $this->createUserAction = app(CreateNewUserAction::class);
+        $this->action = app(ResendVerificationEmail::class);
+        $this->createUserAction = app(CreateNewUser::class);
 
         Notification::fake();
 
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: $this->email,
             uniqueNickname: 'test_user',
             password: 'Password123!',
-            middleName: null
+            middleName: null,
         );
 
-        $this->user = $this->createUserAction->run($dto);
-        $this->resendEmailDTOAssembler = app(ResendEmailDTOAssembler::class);
+        $this->domainUser = $this->createUserAction->run($requestData);
+        $this->user = User::query()->findOrFail($this->domainUser->id);
     }
 
     public function test_it_sends_verification_email_successfully(): void
     {
-        $this->action->run($this->resendEmailDTOAssembler->assemble([
-            'email' => $this->email,
-        ]));
+        $data = ResendEmailRequestData::fromArray(['email' => $this->email]);
+        $this->action->run($data);
 
-        Notification::assertSentTo(
-            $this->user,
-            VerifyEmailForRegisterNotification::class
-        );
+        Notification::assertSentOnDemand(VerifyEmailForRegisterNotification::class);
     }
 
     public function test_it_does_nothing_when_email_not_found(): void
     {
         Notification::fake();
 
-        $this->action->run($this->resendEmailDTOAssembler->assemble([
-            'email' => 'nonexistent@example.com',
-        ]));
+        $data = ResendEmailRequestData::fromArray(['email' => 'nonexistent@example.com']);
+        $this->action->run($data);
 
         Notification::assertNothingSent();
     }
 
     public function test_it_throws_exception_when_email_already_verified(): void
     {
-        $this->user->markEmailAsVerified();
-
+        app(UserRepositoryInterface::class)->markEmailVerified($this->domainUser);
         $this->expectException(EmailAlreadyVerifiedException::class);
 
-        $this->action->run($this->resendEmailDTOAssembler->assemble([
-            'email' => $this->email,
-        ]));
+        $data = ResendEmailRequestData::fromArray(['email' => $this->email]);
+        $this->action->run($data);
     }
 
     public function test_it_does_not_send_verification_to_verified_email(): void
     {
-        $this->user->markEmailAsVerified();
-
+        app(UserRepositoryInterface::class)->markEmailVerified($this->domainUser);
         Notification::fake();
 
         try {
-            $this->action->run($this->resendEmailDTOAssembler->assemble([
-                'email' => $this->email,
-            ]));
+            $data = ResendEmailRequestData::fromArray(['email' => $this->email]);
+            $this->action->run($data);
         } catch (EmailAlreadyVerifiedException $e) {
         }
 
@@ -96,18 +95,12 @@ class ResendEmailActionTest extends TestCase
 
     public function test_it_can_resend_multiple_times_if_not_verified(): void
     {
-        $dto = $this->resendEmailDTOAssembler->assemble([
-            'email' => $this->email,
-        ]);
+        $data = ResendEmailRequestData::fromArray(['email' => $this->email]);
 
-        $this->action->run($dto);
-        $this->action->run($dto);
-        $this->action->run($dto);
+        $this->action->run($data);
+        $this->action->run($data);
+        $this->action->run($data);
 
-        Notification::assertSentToTimes(
-            $this->user,
-            VerifyEmailForRegisterNotification::class,
-            3
-        );
+        Notification::assertSentOnDemandTimes(VerifyEmailForRegisterNotification::class, 3);
     }
 }

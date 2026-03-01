@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\Actions\Password\SendPasswordResetLinkAction;
+use App\Application\User\Auth\CreateNewUser;
+use App\Application\User\Auth\SendPasswordResetLink;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,21 +18,24 @@ class SendPasswordResetLinkActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private SendPasswordResetLinkAction $action;
+    private SendPasswordResetLink $action;
+
     private PasswordResetTokensCacheInterface $cache;
+
     private User $user;
+
     private string $email = 'test@example.com';
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(SendPasswordResetLinkAction::class);
+        $this->action = app(SendPasswordResetLink::class);
         $this->cache = app(PasswordResetTokensCacheInterface::class);
 
         Notification::fake();
 
-        $createUserAction = app(CreateNewUserAction::class);
-        $dto = new CreatingUserDTO(
+        $createUserAction = app(CreateNewUser::class);
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: $this->email,
@@ -39,7 +44,8 @@ class SendPasswordResetLinkActionTest extends TestCase
             middleName: null
         );
 
-        $this->user = $createUserAction->run($dto);
+        $domainUser = $createUserAction->run($requestData);
+        $this->user = User::query()->findOrFail($domainUser->id);
         $this->user->markEmailAsVerified();
     }
 
@@ -47,10 +53,7 @@ class SendPasswordResetLinkActionTest extends TestCase
     {
         $this->action->run($this->email);
 
-        Notification::assertSentTo(
-            $this->user,
-            PasswordResetNotification::class
-        );
+        Notification::assertSentOnDemand(PasswordResetNotification::class);
 
         $token = $this->cache->get($this->email);
         $this->assertNotNull($token);
@@ -94,10 +97,6 @@ class SendPasswordResetLinkActionTest extends TestCase
         $this->assertNotEquals($oldToken, $newToken);
         $this->cache->delete($this->email);
 
-        Notification::assertSentToTimes(
-            $this->user,
-            PasswordResetNotification::class,
-            2
-        );
+        Notification::assertSentOnDemandTimes(PasswordResetNotification::class, 2);
     }
 }

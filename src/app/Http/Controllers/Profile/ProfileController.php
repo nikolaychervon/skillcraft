@@ -4,68 +4,57 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Profile;
 
-use App\Application\User\Profile\Assemblers\ChangeUserEmailDTOAssembler;
-use App\Application\User\Profile\Assemblers\ChangeUserPasswordDTOAssembler;
-use App\Application\User\Profile\Assemblers\UpdateUserProfileDTOAssembler;
-use App\Domain\User\Profile\Actions\ChangeUserEmailAction;
-use App\Domain\User\Profile\Actions\ChangeUserPasswordAction;
-use App\Domain\User\Profile\Actions\GetUserProfileAction;
-use App\Domain\User\Profile\Actions\UpdateUserProfileAction;
-use App\Domain\User\Profile\Exceptions\IncorrectCurrentPasswordException;
+use App\Application\User\Profile\ChangeUserEmail;
+use App\Application\User\Profile\ChangeUserPassword;
+use App\Application\User\Profile\GetUserProfile;
+use App\Application\User\Profile\UpdateUserProfile;
+use App\Domain\User\Profile\RequestData\ChangeUserEmailRequestData;
+use App\Domain\User\Profile\RequestData\ChangeUserPasswordRequestData;
+use App\Domain\User\Profile\RequestData\UpdateUserProfileRequestData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Base\AuthenticatedRequest;
 use App\Http\Requests\Profile\ChangeEmailRequest;
 use App\Http\Requests\Profile\ChangePasswordRequest;
 use App\Http\Requests\Profile\UpdateProfileRequest;
 use App\Http\Resources\Profile\UserProfileResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
-class ProfileController extends Controller
+final class ProfileController extends Controller
 {
-    public function __construct(
-        private readonly UpdateUserProfileDTOAssembler $updateUserProfileDTOAssembler,
-        private readonly ChangeUserEmailDTOAssembler $changeUserEmailDTOAssembler,
-        private readonly ChangeUserPasswordDTOAssembler $changeUserPasswordDTOAssembler,
-    ) {
-    }
-
-    public function show(Request $request, GetUserProfileAction $action): JsonResponse
+    public function show(AuthenticatedRequest $request, GetUserProfile $getUserProfile): JsonResponse
     {
-        $user = $action->run($request->user());
+        $user = $getUserProfile->run($request->getDomainUser());
+
         return ApiResponse::success(data: UserProfileResource::make($user));
     }
 
-    public function update(UpdateProfileRequest $request, UpdateUserProfileAction $action): JsonResponse
+    public function update(UpdateProfileRequest $request, UpdateUserProfile $updateUserProfile): JsonResponse
     {
-        $dto = $this->updateUserProfileDTOAssembler->assemble($request->validated());
-        $user = $action->run($request->user(), $dto);
+        $data = UpdateUserProfileRequestData::fromArray($request->validated());
+        $user = $updateUserProfile->run($request->getDomainUser(), $data);
 
         return ApiResponse::success(
             message: __('messages.profile-updated'),
-            data: UserProfileResource::make($user),
+            data: UserProfileResource::make($user)
         );
     }
 
-    public function changeEmail(ChangeEmailRequest $request, ChangeUserEmailAction $action): JsonResponse
+    public function changeEmail(ChangeEmailRequest $request, ChangeUserEmail $changeUserEmail): JsonResponse
     {
-        $user = $request->user();
-        $dto = $this->changeUserEmailDTOAssembler->assemble($request->validated());
-        $action->run($user, $dto);
+        $data = ChangeUserEmailRequestData::fromArray($request->validated());
+        $changeUserEmail->run($request->getDomainUser(), $data);
 
         return ApiResponse::success(
             message: __('messages.email-verify'),
-            data: ['email' => $dto->getEmail()],
+            data: ['email' => $data->email]
         );
     }
 
-    /**
-     * @throws IncorrectCurrentPasswordException
-     */
-    public function changePassword(ChangePasswordRequest $request, ChangeUserPasswordAction $action): JsonResponse
+    public function changePassword(ChangePasswordRequest $request, ChangeUserPassword $changeUserPassword): JsonResponse
     {
-        $dto = $this->changeUserPasswordDTOAssembler->assemble($request->validated());
-        $action->run($request->user(), $dto);
+        $data = ChangeUserPasswordRequestData::fromArray($request->validated());
+        $changeUserPassword->run($request->getDomainUser(), $data);
 
         return ApiResponse::success(message: __('messages.password-changed'));
     }

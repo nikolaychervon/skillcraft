@@ -1,343 +1,206 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
-use App\Domain\User\Exceptions\UserNotFoundException;
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
 use App\Domain\User\Auth\Cache\PasswordResetTokensCacheInterface;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
 use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
+use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Infrastructure\Notifications\Auth\PasswordResetNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Tests\Concerns\ApiAssertions;
+use Tests\Concerns\CreatesVerifiedUser;
 use Tests\TestCase;
 
 class PasswordResetControllerTest extends TestCase
 {
+    use ApiAssertions;
+    use CreatesVerifiedUser;
     use RefreshDatabase;
 
     private const string FORGOT_PASSWORD_API = '/api/v1/forgot-password';
     private const string RESET_PASSWORD_API = '/api/v1/reset-password';
+    private const string NEW_PASSWORD = 'NewPassword123!';
 
     private User $user;
-    private string $email = 'test@example.com';
-    private string $password = 'Password123!';
-    private string $newPassword = 'NewPassword123!';
     private PasswordResetTokensCacheInterface $cache;
 
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->cache = app(PasswordResetTokensCacheInterface::class);
+        $this->user = $this->createVerifiedUser([
+            'email' => 'reset@example.com',
+            'unique_nickname' => 'password_reset_user',
+        ]);
+    }
 
-        $createUserAction = app(CreateNewUserAction::class);
-        $dto = new CreatingUserDTO(
-            firstName: 'Иван',
-            lastName: 'Петров',
-            email: $this->email,
-            uniqueNickname: 'password_reset_controller',
-            password: $this->password,
-            middleName: null
-        );
-
-        $this->user = $createUserAction->run($dto);
-        $this->user->markEmailAsVerified();
+    /** @return array<string, string> */
+    private function resetPayload(string $email, string $token, string $password = self::NEW_PASSWORD): array
+    {
+        return [
+            'email' => $email,
+            'reset_token' => $token,
+            'password' => $password,
+            'password_confirmation' => $password,
+        ];
     }
 
     public function test_it_sends_password_reset_link_successfully(): void
     {
         Notification::fake();
 
-        $response = $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => $this->email,
-        ]);
+        $response = $this->postJson(self::FORGOT_PASSWORD_API, ['email' => $this->user->email]);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('messages.password-reset-link'),
-            ]);
-
-        Notification::assertSentTo(
-            $this->user,
-            PasswordResetNotification::class
-        );
-
-        $token = $this->cache->get($this->email);
-        $this->assertNotNull($token);
+        $this->assertApiSuccess($response, 200, __('messages.password-reset-link'));
+        Notification::assertSentOnDemand(PasswordResetNotification::class);
+        $this->assertNotNull($this->cache->get($this->user->email));
     }
 
     public function test_it_returns_success_even_if_email_not_found_on_forgot(): void
     {
         Notification::fake();
 
-        $response = $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => 'nonexistent@example.com',
-        ]);
+        $response = $this->postJson(self::FORGOT_PASSWORD_API, ['email' => 'nonexistent@example.com']);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('messages.password-reset-link'),
-            ]);
-
+        $this->assertApiSuccess($response, 200, __('messages.password-reset-link'));
         Notification::assertNothingSent();
-
-        $token = $this->cache->get('nonexistent@example.com');
-        $this->assertNull($token);
+        $this->assertNull($this->cache->get('nonexistent@example.com'));
     }
 
     public function test_it_validates_email_on_forgot_password(): void
     {
-        $response = $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => 'not-an-email',
-        ]);
-
-        $response->assertStatus(422)
+        $this->postJson(self::FORGOT_PASSWORD_API, ['email' => 'not-an-email'])
+            ->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
     }
 
     public function test_it_requires_email_on_forgot_password(): void
     {
-        $response = $this->postJson(self::FORGOT_PASSWORD_API, []);
-
-        $response->assertStatus(422)
+        $this->postJson(self::FORGOT_PASSWORD_API, [])
+            ->assertStatus(422)
             ->assertJsonValidationErrors(['email']);
     }
 
     public function test_it_rate_limits_forgot_password_requests(): void
     {
-        $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => $this->email,
-        ])->assertStatus(200);
-
-        $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => $this->email,
-        ])->assertStatus(429);
+        $this->postJson(self::FORGOT_PASSWORD_API, ['email' => $this->user->email])->assertStatus(200);
+        $this->postJson(self::FORGOT_PASSWORD_API, ['email' => $this->user->email])->assertStatus(429);
     }
 
     public function test_it_resets_password_successfully(): void
     {
-        $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => $this->email,
-        ]);
-
-        $token = $this->cache->get($this->email);
+        $this->postJson(self::FORGOT_PASSWORD_API, ['email' => $this->user->email]);
+        $token = $this->cache->get($this->user->email);
         $this->assertNotNull($token);
 
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => $token,
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ]);
+        $response = $this->postJson(self::RESET_PASSWORD_API, $this->resetPayload($this->user->email, $token));
 
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'success',
-                'message',
-                'data' => ['token']
-            ])
-            ->assertJson([
-                'success' => true,
-                'message' => __('messages.password-reset-successful'),
-            ]);
-
+        $this->assertApiSuccess($response, 200, __('messages.password-reset-successful'));
+        $response->assertJsonStructure(['data' => ['token']]);
         $this->user->refresh();
-        $this->assertTrue(Hash::check($this->newPassword, $this->user->password));
-
-        $this->assertNull($this->cache->get($this->email));
-
+        $this->assertTrue(Hash::check(self::NEW_PASSWORD, $this->user->password));
+        $this->assertNull($this->cache->get($this->user->email));
         $authToken = $response->json('data.token');
         $this->assertNotEmpty($authToken);
         $this->assertStringContainsString('|', $authToken);
     }
 
-    public function test_it_returns_error_on_invalid_reset_token(): void
+    public function test_it_returns_422_on_invalid_reset_token(): void
     {
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => 'invalid-token-123',
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ]);
+        $response = $this->postJson(self::RESET_PASSWORD_API, $this->resetPayload(
+            $this->user->email,
+            'invalid-token-123'
+        ));
 
-        $response->assertStatus(422)
-            ->assertJson([
-                'success' => false,
-                'message' => __('exceptions.' . InvalidResetTokenException::class),
-            ]);
+        $this->assertApiError($response, 422, __('exceptions.'.InvalidResetTokenException::class));
     }
 
-    public function test_it_returns_error_when_token_expired(): void
+    public function test_it_returns_422_when_token_expired(): void
     {
-        $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => $this->email,
-        ]);
-
-        $token = $this->cache->get($this->email);
+        $this->postJson(self::FORGOT_PASSWORD_API, ['email' => $this->user->email]);
+        $token = $this->cache->get($this->user->email);
         $this->assertNotNull($token);
+        $this->cache->delete($this->user->email);
 
-        $this->cache->delete($this->email);
+        $response = $this->postJson(self::RESET_PASSWORD_API, $this->resetPayload($this->user->email, $token));
 
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => $token,
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJson([
-                'success' => false,
-                'message' => __('exceptions.' . InvalidResetTokenException::class),
-            ]);
+        $this->assertApiError($response, 422, __('exceptions.'.InvalidResetTokenException::class));
     }
 
-    public function test_it_returns_error_when_user_not_found_on_reset(): void
+    public function test_it_returns_404_when_user_not_found_on_reset(): void
     {
-        $this->cache->store('nonexistent@example.com', 'some-token-123');
+        $this->cache->store('nonexistent@example.com', 'some-token');
         $token = $this->cache->get('nonexistent@example.com');
 
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => 'nonexistent@example.com',
-            'reset_token' => $token,
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ]);
+        $response = $this->postJson(self::RESET_PASSWORD_API, $this->resetPayload('nonexistent@example.com', $token));
 
-        $response->assertStatus(404)
-            ->assertJson([
-                'success' => false,
-                'message' => __('exceptions.' . UserNotFoundException::class),
-            ]);
+        $this->assertApiError($response, 404, __('exceptions.'.UserNotFoundException::class));
     }
 
-    public function test_it_validates_reset_password_fields(): void
+    #[DataProvider('resetValidationProvider')]
+    public function test_it_validates_reset_password_request(array $payload, array $expectedErrors): void
     {
-        $response = $this->postJson(self::RESET_PASSWORD_API, []);
+        $response = $this->postJson(self::RESET_PASSWORD_API, $payload);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email', 'reset_token', 'password']);
+        $response->assertStatus(422)->assertJsonValidationErrors($expectedErrors);
     }
 
-    public function test_it_validates_email_format_on_reset(): void
+    /** @return array<string, array{0: array<string, string>, 1: array<int, string>}> */
+    public static function resetValidationProvider(): array
     {
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => 'not-an-email',
-            'reset_token' => 'some-token',
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
-    }
-
-    public function test_it_validates_password_confirmation_on_reset(): void
-    {
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => 'some-token',
-            'password' => $this->newPassword,
-            'password_confirmation' => 'wrong-password',
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['password']);
-    }
-
-    public function test_it_validates_password_complexity_on_reset(): void
-    {
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => 'some-token',
-            'password' => 'weak',
-            'password_confirmation' => 'weak',
-        ]);
-
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['password']);
+        return [
+            'missing_all' => [[], ['email', 'reset_token', 'password']],
+            'invalid_email' => [
+                ['email' => 'not-an-email', 'reset_token' => 't', 'password' => self::NEW_PASSWORD, 'password_confirmation' => self::NEW_PASSWORD],
+                ['email'],
+            ],
+            'password_mismatch' => [
+                ['email' => 'e@e.com', 'reset_token' => 't', 'password' => self::NEW_PASSWORD, 'password_confirmation' => 'wrong'],
+                ['password'],
+            ],
+            'weak_password' => [
+                ['email' => 'e@e.com', 'reset_token' => 't', 'password' => 'weak', 'password_confirmation' => 'weak'],
+                ['password'],
+            ],
+        ];
     }
 
     public function test_it_rate_limits_reset_password_attempts(): void
     {
-        $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => 'invalid-token',
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ])->assertStatus(422);
-
-        $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => 'invalid-token-2',
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ])->assertStatus(422);
-
-        $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => 'invalid-token-3',
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ])->assertStatus(422);
-
-        $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => 'invalid-token-4',
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ])->assertStatus(429);
+        $payload = $this->resetPayload($this->user->email, 'invalid');
+        for ($i = 0; $i < 3; $i++) {
+            $this->postJson(self::RESET_PASSWORD_API, $payload)->assertStatus(422);
+        }
+        $this->postJson(self::RESET_PASSWORD_API, $payload)->assertStatus(429);
     }
 
     public function test_it_deletes_old_tokens_after_successful_reset(): void
     {
         $this->user->createToken('device_1')->plainTextToken;
         $this->user->createToken('device_2')->plainTextToken;
+        $this->assertSame(2, $this->user->tokens()->count());
 
-        $this->assertEquals(2, $this->user->tokens()->count());
+        $this->postJson(self::FORGOT_PASSWORD_API, ['email' => $this->user->email]);
+        $token = $this->cache->get($this->user->email);
+        $this->postJson(self::RESET_PASSWORD_API, $this->resetPayload($this->user->email, $token));
 
-        $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => $this->email,
-        ]);
-
-        $token = $this->cache->get($this->email);
-
-        $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => $token,
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ]);
-
-        $this->assertEquals(1, $this->user->tokens()->count());
+        $this->user->refresh();
+        $this->assertSame(1, $this->user->tokens()->count());
     }
 
-    public function test_it_returns_new_token_after_successful_reset(): void
+    public function test_it_returns_valid_token_after_successful_reset(): void
     {
-        $this->postJson(self::FORGOT_PASSWORD_API, [
-            'email' => $this->email,
-        ]);
-
-        $token = $this->cache->get($this->email);
-
-        $response = $this->postJson(self::RESET_PASSWORD_API, [
-            'email' => $this->email,
-            'reset_token' => $token,
-            'password' => $this->newPassword,
-            'password_confirmation' => $this->newPassword,
-        ]);
+        $this->postJson(self::FORGOT_PASSWORD_API, ['email' => $this->user->email]);
+        $token = $this->cache->get($this->user->email);
+        $response = $this->postJson(self::RESET_PASSWORD_API, $this->resetPayload($this->user->email, $token));
 
         $authToken = $response->json('data.token');
-        $this->assertNotEmpty($authToken);
-
-        $this->withHeaders([
-            'Authorization' => 'Bearer ' . $authToken,
-        ])->postJson('/api/v1/logout')
-            ->assertStatus(200);
+        $this->withToken($authToken)->postJson('/api/v1/logout')->assertStatus(200);
     }
 }

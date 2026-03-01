@@ -4,35 +4,32 @@ declare(strict_types=1);
 
 namespace App\Application\Shared\Exceptions;
 
-use App\Http\Responses\ApiResponse;
-use Illuminate\Http\JsonResponse;
+use App\Support\Http\HttpCode;
+use Exception;
+use Throwable;
 
-abstract class ApiException extends \Exception
+abstract class ApiException extends Exception
 {
+    protected HttpCode $statusCode = HttpCode::BadRequest;
+
     public function __construct(
         ?string $message = null,
-        ?int $code = null,
-        ?\Throwable $previous = null
+        int $code = 0,
+        ?Throwable $previous = null,
     ) {
         parent::__construct(
-            message: $message ?? $this->getTranslatedMessage(),
-            code: $code ?? $this->getCode(),
-            previous: $previous
+            $message ?? $this->getTranslatedMessage(),
+            $code,
+            $previous,
         );
     }
 
-    public function render(): JsonResponse
+    public function getStatusCode(): HttpCode
     {
-        return ApiResponse::error(
-            $this->getMessage(),
-            $this->getCode(),
-            $this->getData()
-        );
+        return $this->statusCode;
     }
 
-    /**
-     * @return array<string, mixed>|null
-     */
+    /** @return array<string, mixed>|null */
     public function getData(): ?array
     {
         return null;
@@ -40,22 +37,18 @@ abstract class ApiException extends \Exception
 
     protected function getTranslatedMessage(): string
     {
-        $class = static::class;
-        $message = __("exceptions.$class");
+        $key = 'exceptions.' . static::class;
+        $message = __($key);
 
-        if ($message === "exceptions.$class") {
-            $message = $this->generateDefaultMessage();
-        }
-
-        return $message;
+        return $message !== $key ? $message : $this->generateDefaultMessage();
     }
 
     protected function generateDefaultMessage(): string
     {
-        $className = class_basename($this);
+        $name = class_basename(static::class);
+        $name = (string) preg_replace('/(?<! )(?<![A-Z])(?=[A-Z])/', ' ', $name);
+        $name = str_replace('Exception', '', $name);
 
-        $message = preg_replace('/(?<! )(?<![A-Z])(?=[A-Z])/', ' ', $className);
-        $message = str_replace('Exception', '', $message);
-        return trim($message);
+        return trim($name);
     }
 }

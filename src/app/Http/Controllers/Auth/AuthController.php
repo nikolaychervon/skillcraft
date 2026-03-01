@@ -4,56 +4,41 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Application\Shared\Constants\HttpCodesConstants;
-use App\Application\User\Auth\Assemblers\CreatingUserDTOAssembler;
-use App\Application\User\Auth\Assemblers\LoginUserDTOAssembler;
-use App\Domain\User\Auth\Actions\LoginUserAction;
-use App\Domain\User\Auth\Actions\LogoutAllUserAction;
-use App\Domain\User\Auth\Actions\LogoutUserAction;
-use App\Domain\User\Auth\Actions\RegisterUserAction;
+use App\Application\User\Auth\LoginUser;
+use App\Application\User\Auth\LogoutAllUser;
+use App\Application\User\Auth\LogoutUser;
+use App\Application\User\Auth\RegisterUser;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
+use App\Domain\User\Auth\RequestData\LoginUserRequestData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Base\AuthenticatedRequest;
 use App\Http\Responses\ApiResponse;
+use App\Support\Http\HttpCode;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
-class AuthController extends Controller
+final class AuthController extends Controller
 {
-    public function __construct(
-        private readonly CreatingUserDTOAssembler $creatingUserDTOAssembler,
-        private readonly LoginUserDTOAssembler $loginUserDTOAssembler,
-    ) {
-    }
-
     /**
-     * @param LoginRequest $request
-     * @param LoginUserAction $loginUserAction
-     * @return JsonResponse
-     *
      * @throws IncorrectLoginDataException
      */
-    public function login(LoginRequest $request, LoginUserAction $loginUserAction): JsonResponse
+    public function login(LoginRequest $request, LoginUser $loginUser): JsonResponse
     {
-        $loginUserDTO = $this->loginUserDTOAssembler->assemble($request->validated());
-        $token = $loginUserAction->run($loginUserDTO);
+        $data = LoginUserRequestData::fromArray($request->validated());
+        $token = $loginUser->run($data);
 
         return ApiResponse::success(
             message: __('auth.login'),
-            data: ['token' => $token],
+            data: ['token' => $token]
         );
     }
 
-    /**
-     * @param RegisterRequest $request
-     * @param RegisterUserAction $registerUserAction
-     * @return JsonResponse
-     */
-    public function register(RegisterRequest $request, RegisterUserAction $registerUserAction): JsonResponse
+    public function register(RegisterRequest $request, RegisterUser $registerUser): JsonResponse
     {
-        $creatingUserDTO = $this->creatingUserDTOAssembler->assemble($request->validated());
-        $user = $registerUserAction->run($creatingUserDTO);
+        $data = CreatingUserRequestData::fromArray($request->validated());
+        $user = $registerUser->run($data);
 
         return ApiResponse::success(
             message: __('messages.email-verify'),
@@ -61,29 +46,21 @@ class AuthController extends Controller
                 'user_id' => $user->id,
                 'email' => $user->email,
             ],
-            code: HttpCodesConstants::HTTP_CREATED,
+            code: HttpCode::Created
         );
     }
 
-    /**
-     * @param Request $request
-     * @param LogoutUserAction $logoutUserAction
-     * @return JsonResponse
-     */
-    public function logout(Request $request, LogoutUserAction $logoutUserAction): JsonResponse
+    public function logout(AuthenticatedRequest $request, LogoutUser $logoutUser): JsonResponse
     {
-        $logoutUserAction->run($request->user());
-        return ApiResponse::success(__('auth.logout'));
+        $logoutUser->run($request->getDomainUser());
+
+        return ApiResponse::success(message: __('auth.logout'));
     }
 
-    /**
-     * @param Request $request
-     * @param LogoutAllUserAction $logoutAllUserAction
-     * @return JsonResponse
-     */
-    public function logoutAll(Request $request, LogoutAllUserAction $logoutAllUserAction): JsonResponse
+    public function logoutAll(AuthenticatedRequest $request, LogoutAllUser $logoutAllUser): JsonResponse
     {
-        $logoutAllUserAction->run($request->user());
-        return ApiResponse::success(__('auth.logout-all'));
+        $logoutAllUser->run($request->getDomainUser());
+
+        return ApiResponse::success(message: __('auth.logout-all'));
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Middleware;
 
 use App\Application\Shared\Exceptions\Http\TooManyRequestsHttpException;
@@ -7,7 +9,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 
-class ThrottleAfterValidationMiddleware
+final class ThrottleAfterValidationMiddleware
 {
     private const string THROTTLE_KEY = 'throttle_';
 
@@ -18,7 +20,7 @@ class ThrottleAfterValidationMiddleware
     {
         $key = $this->getKey($request, $keyField);
         if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
-            throw new TooManyRequestsHttpException();
+            throw new TooManyRequestsHttpException;
         }
 
         $response = $next($request);
@@ -30,13 +32,8 @@ class ThrottleAfterValidationMiddleware
         return $response;
     }
 
-    /**
-     * @param Request $request
-     * @param string $keyField
-     * @return string
-     */
     private function getKey(Request $request, string $keyField): string
     {
-        return self::THROTTLE_KEY . $request->getRequestUri() . '_' . $request->input($keyField) . '_' . $request->ip();
+        return self::THROTTLE_KEY.$request->getRequestUri().'_'.$request->input($keyField).'_'.$request->ip();
     }
 }

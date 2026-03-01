@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Auth;
 
-use App\Domain\User\Auth\Actions\CreateNewUserAction;
-use App\Domain\User\Auth\DTO\CreatingUserDTO;
-use App\Models\User;
+use App\Application\User\Auth\CreateNewUser;
+use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
+use App\Domain\User\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -13,17 +15,17 @@ class CreateNewUserActionTest extends TestCase
 {
     use RefreshDatabase;
 
-    private CreateNewUserAction $action;
+    private CreateNewUser $action;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->action = app(CreateNewUserAction::class);
+        $this->action = app(CreateNewUser::class);
     }
 
     public function test_it_creates_user_successfully(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'ivan@example.com',
@@ -32,7 +34,7 @@ class CreateNewUserActionTest extends TestCase
             middleName: 'Иванович'
         );
 
-        $user = $this->action->run($dto);
+        $user = $this->action->run($requestData);
 
         $this->assertInstanceOf(User::class, $user);
         $this->assertDatabaseHas('users', [
@@ -49,7 +51,7 @@ class CreateNewUserActionTest extends TestCase
 
     public function test_it_creates_user_without_middle_name(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Петр',
             lastName: 'Иванов',
             email: 'petr@example.com',
@@ -58,7 +60,7 @@ class CreateNewUserActionTest extends TestCase
             middleName: null
         );
 
-        $user = $this->action->run($dto);
+        $user = $this->action->run($requestData);
 
         $this->assertDatabaseHas('users', [
             'email' => 'petr@example.com',
@@ -68,12 +70,12 @@ class CreateNewUserActionTest extends TestCase
             'unique_nickname' => 'petr_ivanov',
         ]);
 
-        $this->assertNull($user->middle_name);
+        $this->assertNull($user->middleName);
     }
 
     public function test_it_hashes_password(): void
     {
-        $dto = new CreatingUserDTO(
+        $requestData = new CreatingUserRequestData(
             firstName: 'Иван',
             lastName: 'Петров',
             email: 'hash@example.com',
@@ -82,7 +84,7 @@ class CreateNewUserActionTest extends TestCase
             middleName: null
         );
 
-        $user = $this->action->run($dto);
+        $user = $this->action->run($requestData);
 
         $this->assertNotEquals('PlainTextPassword123!', $user->password);
         $this->assertTrue(Hash::check('PlainTextPassword123!', $user->password));
