@@ -7,7 +7,7 @@ namespace App\Domain\User\Exceptions;
 use App\Application\Shared\Exceptions\ApiException;
 use App\Support\Http\HttpCode;
 
-class UserNotFoundException extends ApiException
+final class UserNotFoundException extends ApiException
 {
     protected HttpCode $statusCode = HttpCode::NotFound;
 

@@ -3,6 +3,7 @@
 use App\Application\Shared\Exceptions\Http\NotFoundHttpException;
 use App\Application\Shared\Exceptions\Http\TooManyRequestsHttpException;
 use App\Application\Shared\Exceptions\Http\UnauthorizedException;
+use App\Domain\Mentor\Exceptions\TrackNotFoundException;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
 use App\Domain\User\Auth\Exceptions\PasswordResetFailedException;
@@ -22,4 +23,5 @@ return [
     PasswordResetFailedException::class => 'Не удалось сбросить пароль. Пожалуйста, попробуйте снова.',
     TooManyRequestsHttpException::class => 'Слишком много частых запросов.',
     IncorrectCurrentPasswordException::class => 'Текущий пароль указан неверно.',
+    TrackNotFoundException::class => 'По указанным данным, трек не найден.',
 ];

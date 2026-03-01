@@ -3,6 +3,7 @@
 use App\Application\Shared\Exceptions\Http\NotFoundHttpException;
 use App\Application\Shared\Exceptions\Http\TooManyRequestsHttpException;
 use App\Application\Shared\Exceptions\Http\UnauthorizedException;
+use App\Domain\Mentor\Exceptions\TrackNotFoundException;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
 use App\Domain\User\Auth\Exceptions\InvalidResetTokenException;
 use App\Domain\User\Auth\Exceptions\PasswordResetFailedException;
@@ -22,4 +23,5 @@ return [
     PasswordResetFailedException::class => 'Failed to reset your password. Please try again.',
     TooManyRequestsHttpException::class => 'Too Many Attempts.',
     IncorrectCurrentPasswordException::class => 'Incorrect current password.',
+    TrackNotFoundException::class => 'According to the given data, the track was not found.',
 ];

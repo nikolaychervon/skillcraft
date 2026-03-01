@@ -29,7 +29,7 @@ final class ExceptionHandler
 
     public static function handle(Throwable $e, Request $request): ?JsonResponse
     {
-        if (! $request->expectsJson() && ! $request->is('api/*')) {
+        if (!$request->expectsJson() && !$request->is('api/*')) {
             return null;
         }
 

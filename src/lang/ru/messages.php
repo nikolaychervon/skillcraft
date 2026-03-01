@@ -10,4 +10,6 @@ return [
     'profile-updated' => 'Профиль обновлён',
     'password-changed' => 'Пароль обновлён',
     'email-change-confirmed' => 'Email успешно изменён и подтверждён',
+
+    'mentor-created' => 'Ментор успешно создан.',
 ];

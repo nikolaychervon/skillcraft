@@ -9,7 +9,7 @@ use App\Infrastructure\Notifications\Base\EmailNotification;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\URL;
 
-class VerifyEmailChangeNotification extends EmailNotification
+final class VerifyEmailChangeNotification extends EmailNotification
 {
     public function __construct(
         private readonly int $userId,
