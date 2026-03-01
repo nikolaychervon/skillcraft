@@ -23,6 +23,4 @@ interface CatalogCacheInterface
 
     /** @param Collection<int, ProgrammingLanguage> $languages */
     public function putSpecializationLanguages(int $specializationId, Collection $languages): void;
-
-    public function deleteSpecializationLanguages(int $specializationId): void;
 }

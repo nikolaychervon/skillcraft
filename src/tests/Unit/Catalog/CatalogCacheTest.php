@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Catalog;
 
 use App\Domain\Catalog\ProgrammingLanguage;
@@ -84,24 +86,5 @@ class CatalogCacheTest extends TestCase
         $this->assertSame(1, $result->first()->id);
         $this->assertSame('php', $result->first()->key);
         $this->assertSame(2, $result->get(1)->id);
-    }
-
-    public function test_delete_specialization_languages_clears_only_that_specialization(): void
-    {
-        $langs1 = collect([
-            new ProgrammingLanguage(1, 'a', 'A'),
-        ]);
-        $langs2 = collect([
-            new ProgrammingLanguage(2, 'b', 'B'),
-        ]);
-
-        $this->cache->putSpecializationLanguages(1, $langs1);
-        $this->cache->putSpecializationLanguages(2, $langs2);
-
-        $this->cache->deleteSpecializationLanguages(1);
-
-        $this->assertNull($this->cache->getSpecializationLanguages(1));
-        $this->assertNotNull($this->cache->getSpecializationLanguages(2));
-        $this->assertCount(1, $this->cache->getSpecializationLanguages(2));
     }
 }

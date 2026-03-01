@@ -9,10 +9,6 @@ use App\Domain\User\Auth\Services\NotificationServiceInterface;
 use App\Domain\User\Exceptions\Email\EmailAlreadyVerifiedException;
 use App\Domain\User\Repositories\UserRepositoryInterface;
 
-/**
- * Переотправка письма подтверждения email на указанный адрес.
- * Ничего не делает, если пользователь не найден; исключение — если email уже подтверждён.
- */
 final readonly class ResendVerificationEmail
 {
     public function __construct(

@@ -16,13 +16,13 @@ use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
-class PasswordResetController extends Controller
+final class PasswordResetController extends Controller
 {
     public function forgot(ForgotPasswordRequest $request, SendPasswordResetLink $sendPasswordResetLink): JsonResponse
     {
         $sendPasswordResetLink->run($request->getEmail());
 
-        return ApiResponse::success(__('messages.password-reset-link'));
+        return ApiResponse::success(message: __('messages.password-reset-link'));
     }
 
     /**
@@ -35,6 +35,9 @@ class PasswordResetController extends Controller
         $data = ResetPasswordRequestData::fromArray($request->validated());
         $token = $resetPassword->run($data);
 
-        return ApiResponse::success(__('messages.password-reset-successful'), ['token' => $token]);
+        return ApiResponse::success(
+            message: __('messages.password-reset-successful'),
+            data: ['token' => $token]
+        );
     }
 }

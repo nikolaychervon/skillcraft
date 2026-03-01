@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Catalog\ProgrammingLanguages;
 
 use App\Domain\Catalog\ProgrammingLanguage;

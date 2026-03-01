@@ -1,46 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Profile;
 
-use App\Application\User\Auth\CreateNewUser;
-use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
-use App\Infrastructure\Notifications\Profile\VerifyEmailChangeNotification;
+use App\Domain\User\Exceptions\Email\InvalidConfirmationLinkException;
 use App\Models\User;
+use App\Infrastructure\Notifications\Profile\VerifyEmailChangeNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
+use Tests\Concerns\ApiAssertions;
+use Tests\Concerns\CreatesVerifiedUser;
 use Tests\TestCase;
 
 class ProfileControllerTest extends TestCase
 {
+    use ApiAssertions;
+    use CreatesVerifiedUser;
     use RefreshDatabase;
 
     private const string PROFILE_API = '/api/v1/profile';
-
     private const string CHANGE_EMAIL_API = '/api/v1/profile/change-email';
-
     private const string CHANGE_PASSWORD_API = '/api/v1/profile/change-password';
 
     private User $user;
 
-    private string $password = 'Password123!';
-
     protected function setUp(): void
     {
         parent::setUp();
-
-        $createUserAction = app(CreateNewUser::class);
-        $requestData = new CreatingUserRequestData(
-            firstName: 'Иван',
-            lastName: 'Петров',
-            email: 'profile@example.com',
-            uniqueNickname: 'profile_user',
-            password: $this->password,
-            middleName: null
-        );
-        $domainUser = $createUserAction->run($requestData);
-        $this->user = User::query()->findOrFail($domainUser->id);
-        $this->user->markEmailAsVerified();
+        $this->user = $this->createVerifiedUser([
+            'email' => 'profile@example.com',
+            'unique_nickname' => 'profile_user',
+        ]);
     }
 
     public function test_it_requires_authentication_for_profile_routes(): void
@@ -55,66 +47,40 @@ class ProfileControllerTest extends TestCase
     {
         $response = $this->actingAs($this->user)->getJson(self::PROFILE_API);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-            ])
-            ->assertJsonStructure([
-                'success',
-                'message',
-                'data' => [
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'middle_name',
-                    'unique_nickname',
-                    'email',
-                    'email_verified_at',
-                ],
-            ]);
+        $this->assertApiSuccess($response);
+        $response->assertJsonStructure([
+            'success', 'message',
+            'data' => ['id', 'first_name', 'last_name', 'middle_name', 'unique_nickname', 'email', 'email_verified_at'],
+        ]);
     }
 
     public function test_it_updates_profile_data(): void
     {
-        $response = $this->actingAs($this->user)->putJson(self::PROFILE_API, [
+        $payload = [
             'first_name' => 'Пётр',
             'last_name' => 'Иванов',
             'middle_name' => 'Сергеевич',
             'unique_nickname' => 'profile_user_new',
-        ]);
+        ];
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('messages.profile-updated'),
-            ]);
+        $response = $this->actingAs($this->user)->putJson(self::PROFILE_API, $payload);
 
-        $this->assertDatabaseHas('users', [
-            'id' => $this->user->id,
-            'first_name' => 'Пётр',
-            'last_name' => 'Иванов',
-            'middle_name' => 'Сергеевич',
-            'unique_nickname' => 'profile_user_new',
-        ]);
+        $this->assertApiSuccess($response, 200, __('messages.profile-updated'));
+        $this->assertDatabaseHas('users', array_merge(['id' => $this->user->id], $payload));
     }
 
     public function test_it_updates_profile_with_empty_middle_name_to_null(): void
     {
         $this->user->update(['middle_name' => 'Иванович']);
 
-        $response = $this->actingAs($this->user)->putJson(self::PROFILE_API, [
+        $this->actingAs($this->user)->putJson(self::PROFILE_API, [
             'first_name' => $this->user->first_name,
             'last_name' => $this->user->last_name,
             'middle_name' => '',
             'unique_nickname' => $this->user->unique_nickname,
-        ]);
+        ])->assertStatus(200);
 
-        $response->assertStatus(200);
-
-        $this->assertDatabaseHas('users', [
-            'id' => $this->user->id,
-            'middle_name' => null,
-        ]);
+        $this->assertDatabaseHas('users', ['id' => $this->user->id, 'middle_name' => null]);
     }
 
     public function test_it_validates_profile_update_fields(): void
@@ -126,59 +92,35 @@ class ProfileControllerTest extends TestCase
             'unique_nickname' => 'кириллица',
         ]);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['unique_nickname']);
+        $response->assertStatus(422)->assertJsonValidationErrors(['unique_nickname']);
     }
 
     public function test_it_requests_email_change_and_sets_pending_email(): void
     {
         Notification::fake();
-
         $newEmail = 'new-profile@example.com';
 
-        $response = $this->actingAs($this->user)->postJson(self::CHANGE_EMAIL_API, [
-            'email' => $newEmail,
-        ]);
+        $response = $this->actingAs($this->user)->postJson(self::CHANGE_EMAIL_API, ['email' => $newEmail]);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('messages.email-verify'),
-            ]);
-
-        $this->assertDatabaseHas('users', [
-            'id' => $this->user->id,
-            'pending_email' => $newEmail,
-        ]);
-
+        $this->assertApiSuccess($response, 200, __('messages.email-verify'));
+        $this->assertDatabaseHas('users', ['id' => $this->user->id, 'pending_email' => $newEmail]);
         Notification::assertSentOnDemand(VerifyEmailChangeNotification::class);
     }
 
     public function test_it_verifies_email_change_by_signed_link(): void
     {
         Notification::fake();
-
         $newEmail = 'new-profile@example.com';
-        $this->actingAs($this->user)->postJson(self::CHANGE_EMAIL_API, [
-            'email' => $newEmail,
-        ])->assertStatus(200);
+        $this->actingAs($this->user)->postJson(self::CHANGE_EMAIL_API, ['email' => $newEmail])->assertStatus(200);
 
-        $url = URL::temporarySignedRoute(
-            'profile.email-change.verify',
-            now()->addMinutes(60),
-            [
-                'id' => $this->user->id,
-                'hash' => sha1($newEmail),
-            ]
-        );
+        $url = URL::temporarySignedRoute('profile.email-change.verify', now()->addMinutes(60), [
+            'id' => $this->user->id,
+            'hash' => sha1($newEmail),
+        ]);
 
         $response = $this->getJson($url);
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('messages.email-change-confirmed'),
-            ]);
 
+        $this->assertApiSuccess($response, 200, __('messages.email-change-confirmed'));
         $this->assertDatabaseHas('users', [
             'id' => $this->user->id,
             'email' => $newEmail,
@@ -186,22 +128,45 @@ class ProfileControllerTest extends TestCase
         ]);
     }
 
+    public function test_it_returns_404_for_email_change_verification_with_nonexistent_user(): void
+    {
+        $url = URL::temporarySignedRoute('profile.email-change.verify', now()->addMinutes(60), [
+            'id' => 99999,
+            'hash' => sha1('any@example.com'),
+        ]);
+
+        $this->getJson($url)->assertStatus(404)->assertJsonPath('success', false);
+    }
+
+    public function test_it_returns_400_for_email_change_verification_with_invalid_hash(): void
+    {
+        Notification::fake();
+        $newEmail = 'new-profile@example.com';
+        $this->actingAs($this->user)->postJson(self::CHANGE_EMAIL_API, ['email' => $newEmail])->assertStatus(200);
+
+        $url = URL::temporarySignedRoute('profile.email-change.verify', now()->addMinutes(60), [
+            'id' => $this->user->id,
+            'hash' => sha1('wrong-email@example.com'),
+        ]);
+
+        $response = $this->getJson($url);
+
+        $this->assertApiError($response, 400, __('exceptions.'.InvalidConfirmationLinkException::class));
+        $this->assertDatabaseHas('users', ['id' => $this->user->id, 'pending_email' => $newEmail]);
+    }
+
     public function test_it_changes_password_when_old_password_is_correct(): void
     {
         $response = $this->actingAs($this->user)->postJson(self::CHANGE_PASSWORD_API, [
-            'old_password' => $this->password,
+            'old_password' => $this->defaultPassword(),
             'password' => 'NewPassword123!',
             'password_confirmation' => 'NewPassword123!',
         ]);
 
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('messages.password-changed'),
-            ]);
+        $this->assertApiSuccess($response, 200, __('messages.password-changed'));
     }
 
-    public function test_it_returns_error_when_old_password_is_incorrect(): void
+    public function test_it_returns_422_when_old_password_is_incorrect(): void
     {
         $response = $this->actingAs($this->user)->postJson(self::CHANGE_PASSWORD_API, [
             'old_password' => 'WrongPassword123!',

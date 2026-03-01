@@ -11,7 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
-class EmailChangeVerificationController extends Controller
+final class EmailChangeVerificationController extends Controller
 {
     /**
      * @throws UserNotFoundException
@@ -21,6 +21,6 @@ class EmailChangeVerificationController extends Controller
     {
         $verifyEmailChange->run($id, $hash);
 
-        return ApiResponse::success(__('messages.email-change-confirmed'));
+        return ApiResponse::success(message: __('messages.email-change-confirmed'));
     }
 }

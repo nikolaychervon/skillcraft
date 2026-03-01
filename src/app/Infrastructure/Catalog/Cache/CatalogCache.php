@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Catalog\Cache;
 
 use App\Domain\Catalog\Cache\CatalogCacheInterface;
+use App\Domain\Catalog\ProgrammingLanguage;
 use App\Infrastructure\Catalog\Hydrators\ProgrammingLanguageHydrator;
 use App\Infrastructure\Catalog\Hydrators\SpecializationHydrator;
 use Illuminate\Support\Collection;
@@ -16,7 +17,7 @@ final class CatalogCache implements CatalogCacheInterface
 
     private const string KEY_SPECIALIZATIONS = 'catalog.specializations';
 
-    private const string KEY_SPECIALIZATION_LANGUAGES = 'catalog.specializations.%d.languages';
+    private const string KEY_SPECIALIZATION_LANGUAGES = 'catalog.specialization.%d.languages';
 
     public function __construct(
         private readonly SpecializationHydrator $specializationHydrator,
@@ -65,16 +66,11 @@ final class CatalogCache implements CatalogCacheInterface
         return $this->languageHydrator->fromArrayCollection($cached);
     }
 
+    /** @param Collection<int, ProgrammingLanguage> $languages */
     public function putSpecializationLanguages(int $specializationId, Collection $languages): void
     {
         $key = sprintf(self::KEY_SPECIALIZATION_LANGUAGES, $specializationId);
         $payload = $this->languageHydrator->toArrayCollection($languages);
         Cache::put($key, json_encode($payload), self::TTL_SECONDS);
-    }
-
-    public function deleteSpecializationLanguages(int $specializationId): void
-    {
-        $key = sprintf(self::KEY_SPECIALIZATION_LANGUAGES, $specializationId);
-        Cache::forget($key);
     }
 }

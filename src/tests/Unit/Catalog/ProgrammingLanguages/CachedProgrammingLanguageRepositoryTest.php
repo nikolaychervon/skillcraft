@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Unit\Catalog\ProgrammingLanguages;
 
 use App\Domain\Catalog\Cache\CatalogCacheInterface;
@@ -15,17 +17,15 @@ class CachedProgrammingLanguageRepositoryTest extends TestCase
 {
     use MockeryPHPUnitIntegration;
 
-    public function test_get_by_specialization_id_returns_cached_value_when_cache_hit(): void
+    public function test_get_by_specialization_id_returns_cached_languages_when_cache_hit(): void
     {
-        $cached = collect([
-            new ProgrammingLanguage(1, 'php', 'PHP'),
-        ]);
+        $cachedLanguages = collect([new ProgrammingLanguage(1, 'php', 'PHP')]);
 
         $cache = Mockery::mock(CatalogCacheInterface::class);
         $cache->shouldReceive('getSpecializationLanguages')
             ->once()
             ->with(5)
-            ->andReturn($cached);
+            ->andReturn($cachedLanguages);
         $cache->shouldNotReceive('putSpecializationLanguages');
 
         $innerRepo = Mockery::mock(ProgrammingLanguageRepositoryInterface::class);
@@ -35,7 +35,10 @@ class CachedProgrammingLanguageRepositoryTest extends TestCase
 
         $result = $repo->getBySpecializationId(5);
 
-        $this->assertSame($cached, $result);
+        $this->assertSame($cachedLanguages, $result);
+        $this->assertCount(1, $result);
+        $this->assertSame(1, $result->first()->id);
+        $this->assertSame('php', $result->first()->key);
     }
 
     public function test_get_by_specialization_id_calls_inner_and_puts_to_cache_when_cache_miss(): void
@@ -51,7 +54,7 @@ class CachedProgrammingLanguageRepositoryTest extends TestCase
             ->andReturn(null);
         $cache->shouldReceive('putSpecializationLanguages')
             ->once()
-            ->with(3, Mockery::on(fn (Collection $c): bool => $c->count() === 1 && $c->first()->key === 'js'));
+            ->with(3, $fromDb);
 
         $innerRepo = Mockery::mock(ProgrammingLanguageRepositoryInterface::class);
         $innerRepo->shouldReceive('getBySpecializationId')

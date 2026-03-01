@@ -19,7 +19,7 @@ use App\Http\Responses\ApiResponse;
 use App\Support\Http\HttpCode;
 use Illuminate\Http\JsonResponse;
 
-class AuthController extends Controller
+final class AuthController extends Controller
 {
     /**
      * @throws IncorrectLoginDataException
@@ -29,7 +29,10 @@ class AuthController extends Controller
         $data = LoginUserRequestData::fromArray($request->validated());
         $token = $loginUser->run($data);
 
-        return ApiResponse::success(__('auth.login'), ['token' => $token]);
+        return ApiResponse::success(
+            message: __('auth.login'),
+            data: ['token' => $token]
+        );
     }
 
     public function register(RegisterRequest $request, RegisterUser $registerUser): JsonResponse
@@ -37,23 +40,27 @@ class AuthController extends Controller
         $data = CreatingUserRequestData::fromArray($request->validated());
         $user = $registerUser->run($data);
 
-        return ApiResponse::success(__('messages.email-verify'), [
-            'user_id' => $user->id,
-            'email' => $user->email,
-        ], HttpCode::Created);
+        return ApiResponse::success(
+            message: __('messages.email-verify'),
+            data: [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ],
+            code: HttpCode::Created
+        );
     }
 
     public function logout(AuthenticatedRequest $request, LogoutUser $logoutUser): JsonResponse
     {
         $logoutUser->run($request->getDomainUser());
 
-        return ApiResponse::success(__('auth.logout'));
+        return ApiResponse::success(message: __('auth.logout'));
     }
 
     public function logoutAll(AuthenticatedRequest $request, LogoutAllUser $logoutAllUser): JsonResponse
     {
         $logoutAllUser->run($request->getDomainUser());
 
-        return ApiResponse::success(__('auth.logout-all'));
+        return ApiResponse::success(message: __('auth.logout-all'));
     }
 }

@@ -1,114 +1,93 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature\Auth;
 
-use App\Application\User\Auth\CreateNewUser;
 use App\Domain\User\Auth\Exceptions\IncorrectLoginDataException;
-use App\Domain\User\Auth\RequestData\CreatingUserRequestData;
-use App\Domain\User\Repositories\UserRepositoryInterface;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\ApiAssertions;
+use Tests\Concerns\CreatesVerifiedUser;
 use Tests\TestCase;
 
 class AuthControllerTest extends TestCase
 {
+    use ApiAssertions;
+    use CreatesVerifiedUser;
     use RefreshDatabase;
 
     private const string REGISTER_API = '/api/v1/register';
-
     private const string LOGIN_API = '/api/v1/login';
-
     private const string LOGOUT_API = '/api/v1/logout';
-
     private const string LOGOUT_ALL_API = '/api/v1/logout-all';
 
-    private string $email = 'test@example.com';
-
-    private string $password = 'Password123!';
+    /** @return array<string, mixed> */
+    private function registerPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'first_name' => 'Иван',
+            'last_name' => 'Петров',
+            'email' => 'test@example.com',
+            'unique_nickname' => 'ivan_petrov',
+            'password' => $this->defaultPassword(),
+            'middle_name' => 'Иванович',
+        ], $overrides);
+    }
 
     public function test_it_registers_user_successfully(): void
     {
-        $response = $this->postJson(self::REGISTER_API, [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
-            'email' => $this->email,
-            'unique_nickname' => 'ivan_petrov',
-            'password' => $this->password,
-            'middle_name' => 'Иванович',
-        ]);
+        $payload = $this->registerPayload();
+
+        $response = $this->postJson(self::REGISTER_API, $payload);
 
         $response->assertStatus(201)
-            ->assertJsonStructure([
-                'success',
-                'message',
-                'data' => ['user_id', 'email'],
-            ])
+            ->assertJsonStructure(['success', 'message', 'data' => ['user_id', 'email']])
             ->assertJson([
                 'success' => true,
                 'message' => __('messages.email-verify'),
             ]);
-
         $this->assertDatabaseHas('users', [
-            'email' => $this->email,
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
-            'middle_name' => 'Иванович',
-            'unique_nickname' => 'ivan_petrov',
+            'email' => $payload['email'],
+            'first_name' => $payload['first_name'],
+            'last_name' => $payload['last_name'],
+            'middle_name' => $payload['middle_name'],
+            'unique_nickname' => $payload['unique_nickname'],
         ]);
     }
 
     public function test_it_registers_user_without_middle_name(): void
     {
-        $response = $this->postJson(self::REGISTER_API, [
+        $payload = $this->registerPayload([
             'first_name' => 'Петр',
             'last_name' => 'Иванов',
             'email' => 'petr@example.com',
             'unique_nickname' => 'petr_ivanov',
-            'password' => $this->password,
         ]);
+        unset($payload['middle_name']);
+
+        $response = $this->postJson(self::REGISTER_API, $payload);
 
         $response->assertStatus(201);
-
         $this->assertDatabaseHas('users', [
             'email' => 'petr@example.com',
-            'first_name' => 'Петр',
-            'last_name' => 'Иванов',
             'middle_name' => null,
-            'unique_nickname' => 'petr_ivanov',
         ]);
     }
 
     public function test_it_rate_limits_registration_requests(): void
     {
-        for ($i = 1; $i <= 3; $i++) {
-            $response = $this->postJson('/api/v1/register', [
-                'first_name' => 'Иван',
-                'last_name' => 'Петров',
-                'email' => 'blocked@example.com',
-                'unique_nickname' => "user{$i}",
-                'password' => $this->password,
-                'password_confirmation' => $this->password,
-            ]);
-
-            if ($i < 3) {
-                $response->assertStatus(201);
-            } else {
-                // Третий запрос — последний разрешённый
-                $response->assertStatus(201);
-            }
-        }
-
-        // Четвёртый запрос — должен быть заблокирован
-        $response = $this->postJson('/api/v1/register', [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
+        $payload = $this->registerPayload([
             'email' => 'blocked@example.com',
-            'unique_nickname' => 'blocked_user',
-            'password' => $this->password,
-            'password_confirmation' => $this->password,
+            'password_confirmation' => $this->defaultPassword(),
         ]);
 
-        $response->assertStatus(429);
+        for ($i = 0; $i < 3; $i++) {
+            $payload['unique_nickname'] = "user_{$i}";
+            $this->postJson(self::REGISTER_API, $payload)->assertStatus(201);
+        }
+
+        $payload['unique_nickname'] = 'blocked_user';
+        $this->postJson(self::REGISTER_API, $payload)->assertStatus(429);
     }
 
     public function test_it_validates_required_fields_on_register(): void
@@ -121,198 +100,111 @@ class AuthControllerTest extends TestCase
 
     public function test_it_validates_email_format(): void
     {
-        $response = $this->postJson(self::REGISTER_API, [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
+        $response = $this->postJson(self::REGISTER_API, $this->registerPayload([
             'email' => 'not-an-email',
-            'unique_nickname' => 'ivan_petrov',
-            'password' => $this->password,
-        ]);
+        ]));
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email']);
+        $response->assertStatus(422)->assertJsonValidationErrors(['email']);
     }
 
     public function test_it_validates_unique_nickname_format(): void
     {
-        $response = $this->postJson(self::REGISTER_API, [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
-            'email' => $this->email,
+        $response = $this->postJson(self::REGISTER_API, $this->registerPayload([
             'unique_nickname' => 'никнейм-с-кириллицей',
-            'password' => $this->password,
-        ]);
+        ]));
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['unique_nickname']);
+        $response->assertStatus(422)->assertJsonValidationErrors(['unique_nickname']);
     }
 
     public function test_it_logins_user_successfully(): void
     {
-        $createUserAction = app(CreateNewUser::class);
-        $requestData = new CreatingUserRequestData(
-            firstName: 'Иван',
-            lastName: 'Петров',
-            email: $this->email,
-            uniqueNickname: 'verify_controller',
-            password: $this->password,
-            middleName: null
-        );
-
-        $domainUser = $createUserAction->run($requestData);
-        app(UserRepositoryInterface::class)->markEmailVerified($domainUser);
-
-        $response = $this->postJson(self::LOGIN_API, [
-            'email' => $this->email,
-            'password' => $this->password,
+        $user = $this->createVerifiedUser([
+            'email' => 'login@example.com',
+            'unique_nickname' => 'login_user',
         ]);
 
-        $response->assertStatus(200)
-            ->assertJsonStructure([
-                'success',
-                'message',
-                'data' => ['token'],
-            ])
-            ->assertJson([
-                'success' => true,
-                'message' => __('auth.login'),
-            ]);
+        $response = $this->postJson(self::LOGIN_API, [
+            'email' => $user->email,
+            'password' => $this->defaultPassword(),
+        ]);
 
+        $this->assertApiSuccess($response, 200, __('auth.login'));
+        $response->assertJsonStructure(['data' => ['token']]);
         $this->assertNotEmpty($response->json('data.token'));
     }
 
-    public function test_it_logins_user_error_without_email_verification(): void
+    public function test_it_returns_401_without_email_verification(): void
     {
-        $this->postJson(self::REGISTER_API, [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
-            'email' => $this->email,
-            'unique_nickname' => 'ivan_petrov',
-            'password' => $this->password,
+        $user = $this->createUnverifiedUser([
+            'email' => 'unverified@example.com',
+            'unique_nickname' => 'unverified_user',
         ]);
 
         $response = $this->postJson(self::LOGIN_API, [
-            'email' => $this->email,
-            'password' => $this->password,
+            'email' => $user->email,
+            'password' => $this->defaultPassword(),
         ]);
 
-        $response->assertStatus(401)
-            ->assertJson([
-                'success' => false,
-                'message' => __('exceptions.'.IncorrectLoginDataException::class),
-            ]);
+        $this->assertApiError($response, 401, __('exceptions.'.IncorrectLoginDataException::class));
     }
 
-    public function test_it_returns_error_on_invalid_login(): void
+    public function test_it_returns_401_on_invalid_credentials(): void
     {
         $response = $this->postJson(self::LOGIN_API, [
             'email' => 'wrong@example.com',
             'password' => 'wrong-password',
         ]);
 
-        $response->assertStatus(401)
-            ->assertJson([
-                'success' => false,
-                'message' => __('exceptions.'.IncorrectLoginDataException::class),
-            ]);
+        $this->assertApiError($response, 401, __('exceptions.'.IncorrectLoginDataException::class));
     }
 
     public function test_it_validates_login_fields(): void
     {
         $response = $this->postJson(self::LOGIN_API, []);
 
-        $response->assertStatus(422)
-            ->assertJsonValidationErrors(['email', 'password']);
+        $response->assertStatus(422)->assertJsonValidationErrors(['email', 'password']);
     }
 
     public function test_it_logouts_user_successfully(): void
     {
-        $this->postJson(self::REGISTER_API, [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
-            'email' => $this->email,
-            'unique_nickname' => 'ivan_petrov',
-            'password' => $this->password,
-        ]);
+        $user = $this->createVerifiedUser();
+        $token = $this->postJson(self::LOGIN_API, [
+            'email' => $user->email,
+            'password' => $this->defaultPassword(),
+        ])->json('data.token');
 
-        $user = User::query()->where('email', $this->email)->first();
-        $user->markEmailAsVerified();
+        $response = $this->withToken($token)->postJson(self::LOGOUT_API);
 
-        $loginResponse = $this->postJson(self::LOGIN_API, [
-            'email' => $this->email,
-            'password' => $this->password,
-        ]);
-
-        $token = $loginResponse->json('data.token');
-
-        $logoutResponse = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token,
-        ])->postJson(self::LOGOUT_API);
-
-        $logoutResponse->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('auth.logout'),
-            ]);
-
-        $this->assertDatabaseMissing('personal_access_tokens', [
-            'tokenable_id' => $user->id,
-        ]);
+        $this->assertApiSuccess($response, 200, __('auth.logout'));
+        $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $user->id]);
     }
 
-    public function test_it_logouts_from_all_devices_successfully(): void
+    public function test_it_logouts_from_all_devices(): void
     {
-        $this->postJson(self::REGISTER_API, [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
-            'email' => $this->email,
-            'unique_nickname' => 'ivan_petrov',
-            'password' => $this->password,
-        ]);
-
-        $user = User::query()->where('email', $this->email)->first();
-        $user->markEmailAsVerified();
-
+        $user = $this->createVerifiedUser();
         $token1 = $user->createToken('device_1')->plainTextToken;
         $user->createToken('device_2')->plainTextToken;
+        $this->assertSame(2, $user->tokens()->count());
 
-        $this->assertEquals(2, $user->tokens()->count());
+        $response = $this->withToken($token1)->postJson(self::LOGOUT_ALL_API);
 
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token1,
-        ])->postJson(self::LOGOUT_ALL_API);
-
-        $response->assertStatus(200)
-            ->assertJson([
-                'success' => true,
-                'message' => __('auth.logout-all'),
-            ]);
-
-        $this->assertEquals(0, $user->tokens()->count());
+        $this->assertApiSuccess($response, 200, __('auth.logout-all'));
+        $user->refresh();
+        $this->assertSame(0, $user->tokens()->count());
     }
 
     public function test_it_requires_authentication_for_logout(): void
     {
-        $response = $this->postJson(self::LOGOUT_API, []);
-        $response->assertStatus(401);
+        $this->postJson(self::LOGOUT_API, [])->assertStatus(401);
     }
 
-    public function test_it_returns_user_data_after_login(): void
+    public function test_login_response_does_not_include_user_object(): void
     {
-        $this->postJson(self::REGISTER_API, [
-            'first_name' => 'Иван',
-            'last_name' => 'Петров',
-            'email' => $this->email,
-            'unique_nickname' => 'ivan_petrov',
-            'password' => $this->password,
-        ]);
-
-        $user = User::query()->where('email', $this->email)->first();
-        $user->markEmailAsVerified();
+        $user = $this->createVerifiedUser();
 
         $response = $this->postJson(self::LOGIN_API, [
-            'email' => $this->email,
-            'password' => $this->password,
+            'email' => $user->email,
+            'password' => $this->defaultPassword(),
         ]);
 
         $response->assertJsonMissingPath('data.user');

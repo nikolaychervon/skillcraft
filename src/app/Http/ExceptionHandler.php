@@ -55,9 +55,9 @@ final class ExceptionHandler
     private static function handleApiException(ApiException $e): JsonResponse
     {
         return ApiResponse::error(
-            $e->getMessage(),
-            $e->getStatusCode(),
-            $e->getData(),
+            message: $e->getMessage(),
+            code: $e->getStatusCode(),
+            errors: $e->getData(),
         );
     }
 

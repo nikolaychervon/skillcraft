@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Fakes\RequestDataAssembler;
 
 use App\Domain\Shared\RequestData\BaseRequestData;

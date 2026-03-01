@@ -15,7 +15,7 @@ use App\Http\Requests\Auth\ResendEmailRequest;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
-class EmailVerificationController extends Controller
+final class EmailVerificationController extends Controller
 {
     /**
      * @throws EmailAlreadyVerifiedException
@@ -26,7 +26,10 @@ class EmailVerificationController extends Controller
     {
         $token = $verifyEmail->run($id, $hash);
 
-        return ApiResponse::success(__('messages.email-confirmed'), ['token' => $token]);
+        return ApiResponse::success(
+            message: __('messages.email-confirmed'),
+            data: ['token' => $token]
+        );
     }
 
     /**
@@ -37,6 +40,6 @@ class EmailVerificationController extends Controller
         $data = ResendEmailRequestData::fromArray($request->validated());
         $resendVerificationEmail->run($data);
 
-        return ApiResponse::success(__('messages.email-resend'));
+        return ApiResponse::success(message: __('messages.email-resend'));
     }
 }

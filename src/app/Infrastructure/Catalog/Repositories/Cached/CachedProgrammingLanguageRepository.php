@@ -24,9 +24,9 @@ final class CachedProgrammingLanguageRepository implements ProgrammingLanguageRe
             return $cached;
         }
 
-        $data = $this->programmingLanguageRepository->getBySpecializationId($specializationId);
-        $this->cache->putSpecializationLanguages($specializationId, $data);
+        $languages = $this->programmingLanguageRepository->getBySpecializationId($specializationId);
+        $this->cache->putSpecializationLanguages($specializationId, $languages);
 
-        return $data;
+        return $languages;
     }
 }

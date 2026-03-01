@@ -20,7 +20,7 @@ use App\Http\Resources\Profile\UserProfileResource;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
 
-class ProfileController extends Controller
+final class ProfileController extends Controller
 {
     public function show(AuthenticatedRequest $request, GetUserProfile $getUserProfile): JsonResponse
     {
@@ -34,7 +34,10 @@ class ProfileController extends Controller
         $data = UpdateUserProfileRequestData::fromArray($request->validated());
         $user = $updateUserProfile->run($request->getDomainUser(), $data);
 
-        return ApiResponse::success(__('messages.profile-updated'), UserProfileResource::make($user));
+        return ApiResponse::success(
+            message: __('messages.profile-updated'),
+            data: UserProfileResource::make($user)
+        );
     }
 
     public function changeEmail(ChangeEmailRequest $request, ChangeUserEmail $changeUserEmail): JsonResponse
@@ -42,7 +45,10 @@ class ProfileController extends Controller
         $data = ChangeUserEmailRequestData::fromArray($request->validated());
         $changeUserEmail->run($request->getDomainUser(), $data);
 
-        return ApiResponse::success(__('messages.email-verify'), ['email' => $data->email]);
+        return ApiResponse::success(
+            message: __('messages.email-verify'),
+            data: ['email' => $data->email]
+        );
     }
 
     public function changePassword(ChangePasswordRequest $request, ChangeUserPassword $changeUserPassword): JsonResponse
@@ -50,6 +56,6 @@ class ProfileController extends Controller
         $data = ChangeUserPasswordRequestData::fromArray($request->validated());
         $changeUserPassword->run($request->getDomainUser(), $data);
 
-        return ApiResponse::success(__('messages.password-changed'));
+        return ApiResponse::success(message: __('messages.password-changed'));
     }
 }

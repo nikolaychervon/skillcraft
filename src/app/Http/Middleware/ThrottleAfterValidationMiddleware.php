@@ -9,7 +9,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 
-class ThrottleAfterValidationMiddleware
+final class ThrottleAfterValidationMiddleware
 {
     private const string THROTTLE_KEY = 'throttle_';
 
