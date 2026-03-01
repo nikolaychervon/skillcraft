@@ -23,7 +23,7 @@ final class MentorMapper
             slug: $model->slug,
             targetLevel: $model->target_level,
             currentLevel: $model->current_level,
-            howToCallMe: $model->how_to_call_me,
+            howToCallMe: $model->how_to_call_me ?? '',
             useNameToCallMe: $model->use_name_to_call_me,
             mentorPersona: $model->mentor_persona,
             createdAt: DateTimeImmutable::createFromMutable($model->created_at),

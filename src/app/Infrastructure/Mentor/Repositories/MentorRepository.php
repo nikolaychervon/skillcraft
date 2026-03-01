@@ -8,12 +8,25 @@ use App\Domain\Mentor\Mentor;
 use App\Infrastructure\Mentor\Mappers\MentorMapper;
 use App\Models\Mentor as MentorModel;
 use App\Domain\Mentor\Repositories\MentorRepositoryInterface;
+use Illuminate\Support\Collection;
 
 final class MentorRepository implements MentorRepositoryInterface
 {
     public function __construct(
         private MentorMapper $mapper,
     ) {}
+
+    /** @inheritDoc */
+    public function getListByUserId(int $userId): Collection
+    {
+        $models = MentorModel::query()
+            ->with(['track.specialization', 'track.programmingLanguage'])
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return $models->map(fn (MentorModel $model): Mentor => $this->mapper->toDomain($model));
+    }
 
     public function create(array $data): Mentor
     {

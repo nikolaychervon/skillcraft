@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Mentor\Repositories\Cached;
 
+use App\Domain\Mentor\Cache\TrackCacheInterface;
 use App\Domain\Mentor\Repositories\TrackRepositoryInterface;
 use App\Domain\Mentor\Track;
-use App\Infrastructure\Mentor\Cache\TrackCache;
 
 final class CachedTrackRepository implements TrackRepositoryInterface
 {
     public function __construct(
         private TrackRepositoryInterface $trackRepository,
-        private TrackCache $trackCache,
+        private TrackCacheInterface $trackCache,
     ) {}
 
     public function getBySpecializationAndLanguage(int $specializationId, int $programmingLanguageId): ?Track

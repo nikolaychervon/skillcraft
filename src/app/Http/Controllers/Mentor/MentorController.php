@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Mentor;
 
 use App\Application\Mentor\CreateNewMentor;
+use App\Application\Mentor\GetUserMentors;
 use App\Domain\Mentor\RequestData\CreateNewMentorRequestData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Base\AuthenticatedRequest;
 use App\Http\Requests\Mentor\StoreMentorRequest;
+use App\Http\Resources\Mentor\MentorItemResource;
 use App\Http\Resources\Mentor\MentorResource;
 use App\Http\Responses\ApiResponse;
 use App\Models\Mentor;
@@ -17,9 +20,11 @@ use Illuminate\Http\Request;
 
 final class MentorController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(AuthenticatedRequest $request, GetUserMentors $getUserMentors): JsonResponse
     {
-        return response()->json([]);
+        $mentors = $getUserMentors->run($request->getDomainUser()->id);
+
+        return ApiResponse::success(data: MentorItemResource::collection($mentors));
     }
 
     public function store(StoreMentorRequest $request, CreateNewMentor $createNewMentor): JsonResponse
