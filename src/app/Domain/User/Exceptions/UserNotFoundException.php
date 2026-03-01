@@ -19,8 +19,8 @@ final class UserNotFoundException extends ApiException
         parent::__construct();
     }
 
-    /** @return array{search_data: array<string, mixed>}|null */
-    public function getData(): ?array
+    /** @return array{search_data: array<string, mixed>} */
+    public function getData(): array
     {
         return ['search_data' => $this->searchData];
     }

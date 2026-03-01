@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Mentor;
 
 use App\Application\Mentor\CreateNewMentor;
+use App\Application\Mentor\GetMentor;
 use App\Application\Mentor\GetUserMentors;
 use App\Domain\Mentor\RequestData\CreateNewMentorRequestData;
 use App\Http\Controllers\Controller;
@@ -39,18 +40,23 @@ final class MentorController extends Controller
         );
     }
 
-    public function show(Mentor $mentor): JsonResponse
+    public function show(AuthenticatedRequest $request, int $mentorId, GetMentor $getMentor): JsonResponse
     {
-        return response()->json([]);
+        $mentorDomain = $getMentor->run($mentorId, $request->getDomainUser()->id);
+        return ApiResponse::success(data: MentorResource::make($mentorDomain));
     }
 
     public function update(Request $request, Mentor $mentor): JsonResponse
     {
+        $this->authorize('update', $mentor);
+
         return response()->json([]);
     }
 
     public function destroy(Mentor $mentor): JsonResponse
     {
+        $this->authorize('delete', $mentor);
+
         return response()->json([]);
     }
 }

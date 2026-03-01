@@ -16,8 +16,8 @@ final class TrackNotFoundException extends ApiException
         parent::__construct();
     }
 
-    /** @return array{specialization_id: int, programming_language_id: int}|null */
-    public function getData(): ?array
+    /** @return array{specialization_id: int, programming_language_id: int} */
+    public function getData(): array
     {
         return [
             'specialization_id' => $this->specializationId,

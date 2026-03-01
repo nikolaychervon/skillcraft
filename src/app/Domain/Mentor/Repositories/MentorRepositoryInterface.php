@@ -9,6 +9,8 @@ use Illuminate\Support\Collection;
 
 interface MentorRepositoryInterface
 {
+    public function findById(int $id): ?Mentor;
+
     /** @return Collection<int, Mentor> */
     public function getListByUserId(int $userId): Collection;
 

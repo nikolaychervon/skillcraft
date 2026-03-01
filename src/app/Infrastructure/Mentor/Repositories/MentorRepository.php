@@ -16,6 +16,15 @@ final class MentorRepository implements MentorRepositoryInterface
         private MentorMapper $mapper,
     ) {}
 
+    public function findById(int $id): ?Mentor
+    {
+        $model = MentorModel::query()
+            ->with(['track.specialization', 'track.programmingLanguage'])
+            ->find($id);
+
+        return $model !== null ? $this->mapper->toDomain($model) : null;
+    }
+
     /** @inheritDoc */
     public function getListByUserId(int $userId): Collection
     {

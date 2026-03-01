@@ -16,6 +16,11 @@ final class CachedMentorRepository implements MentorRepositoryInterface
         private MentorCacheInterface $mentorCache,
     ) {}
 
+    public function findById(int $id): ?Mentor
+    {
+        return $this->mentorRepository->findById($id);
+    }
+
     public function getListByUserId(int $userId): Collection
     {
         $mentors = $this->mentorCache->getListByUserId($userId);

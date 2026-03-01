@@ -1,5 +1,6 @@
 <?php
 
+use App\Application\Shared\Exceptions\Http\AccessDeniedException;
 use App\Application\Shared\Exceptions\Http\NotFoundHttpException;
 use App\Application\Shared\Exceptions\Http\TooManyRequestsHttpException;
 use App\Application\Shared\Exceptions\Http\UnauthorizedException;
@@ -24,4 +25,5 @@ return [
     TooManyRequestsHttpException::class => 'Too Many Attempts.',
     IncorrectCurrentPasswordException::class => 'Incorrect current password.',
     TrackNotFoundException::class => 'According to the given data, the track was not found.',
+    AccessDeniedException::class => 'You do not have access to this section.',
 ];

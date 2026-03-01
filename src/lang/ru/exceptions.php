@@ -1,5 +1,6 @@
 <?php
 
+use App\Application\Shared\Exceptions\Http\AccessDeniedException;
 use App\Application\Shared\Exceptions\Http\NotFoundHttpException;
 use App\Application\Shared\Exceptions\Http\TooManyRequestsHttpException;
 use App\Application\Shared\Exceptions\Http\UnauthorizedException;
@@ -24,4 +25,5 @@ return [
     TooManyRequestsHttpException::class => 'Слишком много частых запросов.',
     IncorrectCurrentPasswordException::class => 'Текущий пароль указан неверно.',
     TrackNotFoundException::class => 'По указанным данным, трек не найден.',
+    AccessDeniedException::class => 'У вас нет доступа к этому разделу.',
 ];

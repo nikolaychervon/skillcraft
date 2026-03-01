@@ -13,12 +13,14 @@ use App\Infrastructure\Mentor\Cache\MentorCache;
 use App\Infrastructure\Mentor\Cache\TrackCache;
 use App\Infrastructure\Mentor\Listeners\InvalidateUserMentorsCache;
 use App\Infrastructure\Mentor\Observers\MentorObserver;
+use App\Infrastructure\Mentor\Policies\MentorPolicy;
 use App\Infrastructure\Mentor\Repositories\Cached\CachedMentorRepository;
 use App\Infrastructure\Mentor\Repositories\Cached\CachedTrackRepository;
 use App\Infrastructure\Mentor\Repositories\MentorRepository;
 use App\Infrastructure\Mentor\Repositories\TrackRepository;
 use App\Models\Mentor;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 final class MentorServiceProvider extends ServiceProvider
@@ -44,6 +46,9 @@ final class MentorServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Event::listen(MentorChanged::class, InvalidateUserMentorsCache::class);
+
         Mentor::observe(MentorObserver::class);
+
+        Gate::policy(Mentor::class, MentorPolicy::class);
     }
 }
